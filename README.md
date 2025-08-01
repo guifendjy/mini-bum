@@ -1,6 +1,6 @@
 # 🁬 MiniBum JS
 
-**MiniBum** is a lightweight, signal-based DOM micro-library designed for rapid UI prototyping, education, and exploration of reactive state management. It consists of two parts:
+**MiniBum** is a lightweight, signal-based DOM micro-library designed for rapid UI prototyping, and exploration of reactive state management. It consists of two parts:
 
 - [`minibum-core`](./docs/core/README.md): Low-level, class-based reactivity and DOM bindings
 - [`minibum`](./docs/core/README.md): A user-friendly wrapper with sugar syntax for easier UI creation
