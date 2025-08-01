@@ -3,7 +3,7 @@
 **MiniBum** is a lightweight, signal-based DOM micro-library designed for rapid UI prototyping, and exploration of reactive state management. It consists of two parts:
 
 - [`minibum-core`](./docs/core/README.md): Low-level, class-based reactivity and DOM bindings
-- [`minibum`](./docs/core/README.md): A user-friendly wrapper with sugar syntax for easier UI creation
+- [`minibum`](./docs/wrapper/README.md): A user-friendly wrapper with sugar syntax for easier UI creation
 
 > 🎓 **Educational Project:** MiniBum explores reactivity, state management, and DOM rendering(client) from the ground up. Free to use, extend, and learn from.
 
