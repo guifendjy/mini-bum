@@ -1,5 +1,3 @@
-# wrapper/README.md
-
 # 🍬 MiniBum Wrapper
 
 High-level syntax sugar wrapper for MiniBum Core. Great for quick prototyping and a more declarative feel.

@@ -1,5 +1,3 @@
-# core/README.md
-
 # 🧱 MiniBum Core
 
 Low-level DOM reactive engine built with JavaScript classes and functional bindings.
