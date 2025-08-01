@@ -1,0 +1,46 @@
+{
+  "name": "minibum",
+  "version": "1.0.0",
+  "description": "🍬This is an educational project that explores state management,reactive UI patterns, and DOM rendering using plain JavaScript. it has two parts the core and a wrapper.",
+  "module": "./dist/minibum.wrapper.js",
+  "exports": {
+    ".": {
+      "import": "./dist/minibum.wrapper.js"
+    },
+    "./min": {
+      "import": "./dist/minibum.wrapper.min.js"
+    },
+    "./core": {
+      "import": "./dist/minibum.core.js"
+    },
+    "./core.min": {
+      "import": "./dist/minibum.core.min.js"
+    }
+  },
+  "file": [
+    "dist",
+    "docs",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c -w"
+  },
+  "keywords": [
+    "dom",
+    "reactive",
+    "ui",
+    "library",
+    "minibum",
+    "mini-bum"
+  ],
+  "author": "Dads Guifendjy Paul",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "rollup": "^2.79.2",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}
