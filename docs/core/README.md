@@ -120,8 +120,3 @@ new ConditionalElement(count, (v) =>
 );
 ```
 
-## Notes
-
-- Supports object bindings and nested attribute updates.
-- Signal objects returned by `signal()` can be accessed directly with `.value`.
-- Use `$bind(callback, false)` on a signal if you want to subscribe manually outside of the Element context.

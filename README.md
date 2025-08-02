@@ -5,9 +5,9 @@
 - [`minibum-core`](./docs/core/README.md): Low-level, class-based reactivity and DOM bindings
 - [`minibum`](./docs/wrapper/README.md): A user-friendly wrapper with sugar syntax for easier UI creation
 
-> 🎓 **Educational Project:** MiniBum explores reactivity, state management, and DOM rendering(client) from the ground up. Free to use, extend, and learn from.
+> 🎓 **Experimental Project:** MiniBum explores reactivity, state management, and DOM rendering(client) from the ground up. Free to use, extend, and learn from.
 
-> ⚠️ This project is educational and MIT licensed. Feel free to use, modify, and learn from it!
+> ⚠️ This project is experimental and MIT licensed. Feel free to use, modify, and learn from it!
 
 ## Installation
 
