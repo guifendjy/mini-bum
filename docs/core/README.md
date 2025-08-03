@@ -7,7 +7,8 @@ Low-level DOM reactive engine built with JavaScript classes and functional bindi
 ## Installation
 
 ```bash
-npm install minibum@experimental.0
+npm install minibum@experimental
+
 ```
 
 ## Usage
