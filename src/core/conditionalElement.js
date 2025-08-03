@@ -1,10 +1,10 @@
 import walkAndUnbind from "./utils/walkAndUnbind.js";
 import { $bind } from "../signal/index.js";
 
-/** CondtionalElement
+/** ConditionalElement
  * Parameters:
- * 1. signal: a signal or an array of signals that will be used to evaluate the condition.
- * 2. a callback function that takes the signal value as an argument and returns a node to render based on the condition.
+ * 1. signals: A signal or an array of signals.
+ * 2. condFn: A callback function that gets passed the value(s) of the signal(s) as parameter and gets reevaluated whenever any signal's value changes.
  */
 export default class ConditionalElement {
   #signals;
@@ -14,29 +14,33 @@ export default class ConditionalElement {
     this.#signals = signals;
     this.#condFn = condFn;
 
-    let markerNode = document.createComment("mrk:cond"); // initial marker node
+    let markerNode = document.createComment("mrk:cond"); // Initial marker node
+
     $bind(
       this.#signals,
       (values) => {
-        walkAndUnbind(markerNode); // unbind signals of the current node and children before rendering a new one
-
         const nodeToRender = this.#condFn(values);
 
-        if (
-          !nodeToRender ||
-          !nodeToRender instanceof Element ||
-          !nodeToRender instanceof HTMLElement
-        ) {
-          console.error(
-            "Error: expected a valid Element to render but got:",
-            nodeToRender
-          );
+        if (markerNode === nodeToRender) return; // If the node to render is the same as the marker node, do nothing
+
+        if (!nodeToRender) {
+          // If no node to render, ensure markerNode is a comment
+          if (
+            markerNode.nodeType !== Node.COMMENT_NODE ||
+            markerNode.nodeValue !== "mrk:cond"
+          ) {
+            walkAndUnbind(markerNode); // Unbind signals of the current node and children
+            const commentNode = document.createComment("mrk:cond");
+            markerNode.replaceWith(commentNode);
+            markerNode = commentNode;
+          }
           return;
         }
-        if (nodeToRender.isEqualNode(markerNode)) return; // no need to update if the node is the same(even it the evaluation happens muttiple times with multiple signals)
 
+        // If there is a node to render, replace the markerNode
+        walkAndUnbind(markerNode); // Unbind signals of the current node and children
         markerNode.replaceWith(nodeToRender);
-        markerNode = nodeToRender; // update the markerNode to the new node
+        markerNode = nodeToRender; // Update markerNode to the new node
       },
       false
     );

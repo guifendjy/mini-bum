@@ -19,6 +19,28 @@ import { signal, $bind } from "../signal/index.js";
  * See LICENSE file for full terms. 🍬
  */
 
+/**
+ * @interface E
+ * @method tag
+ * Creates a DOM element of the specified tag(eg: E.div(...), E.span(...)) type. Accepts:
+ * - A single value (string, number, Node, array, or reactive signal) as the element's content.
+ * - An object with `children` and/or attributes to define the element's properties.
+ * - No arguments, creating an empty element.
+ *
+ * @method fragment
+ * Creates a document fragment containing the provided children. Handles arrays, Nodes, reactive signals,
+ * or other valid child types, skipping invalid ones.
+ *
+ * @method text
+ * Creates a reactive text node. Automatically detects if the provided text is a signal or a static value.
+ *
+ * @method list
+ * Creates a reactive list of elements based on a signal and a mapping function. Automatically updates
+ * when the signal changes.
+ *
+ * @method cond
+ * Creates a reactive conditional element that updates based on a signal and a condition function.
+ */
 const E = _init_();
 
 export default E;

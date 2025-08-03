@@ -1,10 +1,16 @@
 import walkAndUnbind from "./utils/walkAndUnbind";
 
-/** ListElement
+/**
+ * ListElement
+ * 
  * Parameters:
- * 1. signal: a reactive value that triggers a rerender or re-evaluation of a given callback using the bind method provide by the signal api. it's value has to be an array.
- * 2. callback: which take a signal as parameter which can be used to loop through and return map op nodes either regular dom nodes or elements(can be nested if signal's value is a 2 dimensional array users have to figure out the logic)
- * // ps: the entire stucture gets re-renrendered when the signals value changes.
+ * 1. signal: A reactive value (expected to be an array) that triggers re-rendering or re-evaluation of a callback whenever its value changes. The signal must provide a `bind` method as part of its API.
+ * 
+ * 2. mapFn: A callback function that takes the signal's value as input and returns an array of DOM nodes or elements. These nodes can be nested if the signal's value is a multi-dimensional array. The user is responsible for implementing the logic to handle such cases.
+ * 
+ * Behavior:
+ * - The entire structure is re-rendered whenever the signal's value changes.
+ * - Existing nodes are unbound and removed before new nodes are rendered.
  */
 export default class ListElement {
   #signal;

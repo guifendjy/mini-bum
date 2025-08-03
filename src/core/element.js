@@ -1,8 +1,12 @@
-/**  Element
- *  * Parameters:
- * 1. type: the type of element you want to create or an an existing element. -> eg: div, span, etc {String || an Instance of HTMLElement} | required
- * 2. attributes: you can add any attributes that is not readonly onto the created element. -> eg: textContent, className, style(can nest object to apply properties like display, gap etc. can also be just a string) {Object || null}  | Optional
- * 3. childNodes: you can add childNode either created with Element constructor or just any legit Dom node. {Array} | Optional
+/** Element
+ * Parameters:
+ * 1. type: The type of element to create (e.g., "div", "span") or an existing DOM element. {String | HTMLElement} | Required
+ * 2. attributes: An object containing attributes to set on the created element. Supports:
+ *    - Standard attributes (e.g., "textContent", "className").
+ *    - "class": A nested object where each key is a class name and its value is a boolean or reactive signal.
+ *    - "style": A nested object for CSS properties or a string for inline styles.
+ * {Object | null} | Optional
+ * 3. childNodes: An array of child nodes to append to the created element. Can include strings, DOM nodes, or instances created with the Element constructor. {Array | null} | Optional
  */
 export default class Element {
   #type;

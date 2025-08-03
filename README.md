@@ -7,12 +7,12 @@
 
 > 🎓 **Experimental Project:** MiniBum explores reactivity, state management, and DOM rendering(client) from the ground up. Free to use, extend, and learn from.
 
-> ⚠️ This project is experimental and MIT licensed. Feel free to use, modify, and learn from it!
+> ⚠️ This project is `experimental` and MIT licensed. Feel free to use, modify, and learn from it!
 
 ## Installation
 
 ```bash
-npm install minibum
+npm install minibum@experimental.0
 ```
 
 ## Highlights

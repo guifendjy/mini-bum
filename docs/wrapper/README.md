@@ -2,10 +2,12 @@
 
 High-level syntax sugar wrapper for MiniBum Core. Great for quick prototyping and a more declarative feel.
 
+> ⚠️ This project is `experimental` and MIT licensed. Feel free to use, modify, and learn from it!
+
 ## Installation
 
 ```bash
-npm install minibum
+npm install minibum@experimental.0
 ```
 
 ## Usage

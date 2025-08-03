@@ -2,10 +2,12 @@
 
 Low-level DOM reactive engine built with JavaScript classes and functional bindings.
 
+> ⚠️ This project is `experimental` and MIT licensed. Feel free to use, modify, and learn from it!
+
 ## Installation
 
 ```bash
-npm install minibum
+npm install minibum@experimental.0
 ```
 
 ## Usage
@@ -119,4 +121,3 @@ new ConditionalElement(count, (v) =>
     : new Element("p", null, "Zero or Negative")
 );
 ```
-

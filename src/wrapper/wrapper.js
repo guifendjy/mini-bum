@@ -1,7 +1,6 @@
 import tagNames from "./tagNames.js";
 import { Element, ConditionalElement, ListElement } from "../core/index.js";
 
-
 export default function _init_() {
   const E = {};
 
