@@ -21,6 +21,10 @@
     "dist/",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guifendjy/mini-bum"
+  },
   "scripts": {
     "build": "rollup -c",
     "build:watch": "rollup -c -w"

@@ -161,7 +161,7 @@ export default class Element {
 
     if (this.#childNodes) {
       this.#childNodes.forEach((childNode) => {
-        if (typeof childNode === "string")
+        if (typeof childNode === "string" || typeof childNode === "number")
           childNode = document.createTextNode(childNode); // none reactive text can be used inside of children array
 
         element.appendChild(childNode);
