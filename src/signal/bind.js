@@ -1,11 +1,13 @@
-/** * $bind
- * Parameters:
- * 1. signals: a signal or an array of signals to bind to
- * 2. callback: a function that gets passed the signal value as an argument.
- * 3. evalAsExpression: (default to true) a boolean that determines whether the callback should be evaluated as an expression to an attribute or not.
- * Returns:
- * un unbind function if set to false else an object with a evaluate method that can be used to evaluate the callback and apply the value to the element attribute.
- * the evaluate method then returns an unbind function that can be used to unbind the signals.(could be used if you want to initialize the binding and evaluate later on).
+/**
+ * Subscribes one or multiple signals to a callback function.
+ * 
+ * ex: `$bind(signalOrSignals, callback, evalAsExpression=true)` → subscribes multiple signals at once.
+ *
+ * @template T
+ * @param {Signal<T> | Signal<T>[]} signals - A signal or array of signals to bind.
+ * @param {(value: T) => Node} callback - Function called whenever the signal changes.
+ *  @param {boolean} [evalAsExpression=true] - Whether the callback should be evaluated as a reactive expression or just called as a regular function.
+ * @returns {Function|{_signal_: boolean, evaluate: function(Function): Function}} - Returns an unbind function if evalAsExpression is false; otherwise returns an object for reactive evaluation.
  */
 
 export default function $bind(signals, callback, evalAsExpression = true) {

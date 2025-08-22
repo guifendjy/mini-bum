@@ -63,6 +63,30 @@ This design provides a clean, declarative, and reactive approach to building UIs
 - `E.fragment(...children)` → creates a fragment
 - `E.list(signal, mapFn)` → Creates a reactive list block
 - `E.cond(signals, condFn)` → Reactive conditional rendering
+- `E.$(selector, attributes)` → allows you to **target existing DOM nodes** and apply reactive attributes or event listeners.
+
+### Example
+
+- **Selector string**: `E.$('#id')`
+- **Node**: `E.$(element)`
+- **NodeList / Array of nodes**: `E.$(document.querySelectorAll('.class'))`
+
+```js
+import { E, signal } from "minibum";
+
+const isActive = signal(false);
+
+E.$("#toggle-btn", {
+  onclick: () => isActive.set(!isActive.get()),
+  class: {
+    $static: "btn",
+    active: isActive, // reactive class toggled by signal
+  },
+});
+```
+
+> Note: See custom attributes at 
+[minibum/core](../wrapper/README.md)
 
 ## Benefits
 

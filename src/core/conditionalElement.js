@@ -1,14 +1,19 @@
 import walkAndUnbind from "./utils/walkAndUnbind.js";
 import { $bind } from "../signal/index.js";
 
-/** ConditionalElement
- * Parameters:
- * 1. signals: A signal or an array of signals.
- * 2. condFn: A callback function that gets passed the value(s) of the signal(s) as parameter and gets reevaluated whenever any signal's value changes.
+/**
+ * @class
+ * Represents a reactive conditional renderer.
  */
 export default class ConditionalElement {
   #signals;
   #condFn;
+
+  /**
+   * @param {Signal<T> | Signal<T>[]} signals - A signal or array of signals to bind to.
+   * @param {(value: any) => Node} condFn Function that returns a node depending on signal value
+   * @returns {HTMLElement}
+   */
 
   constructor(signals, condFn) {
     this.#signals = signals;

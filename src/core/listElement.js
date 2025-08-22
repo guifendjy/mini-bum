@@ -1,22 +1,19 @@
-import walkAndUnbind from "./utils/walkAndUnbind";
+import walkAndUnbind from "./utils/walkAndUnbind.js";
 
 /**
- * ListElement
- * 
- * Parameters:
- * 1. signal: A reactive value (expected to be an array) that triggers re-rendering or re-evaluation of a callback whenever its value changes. The signal must provide a `bind` method as part of its API.
- * 
- * 2. mapFn: A callback function that takes the signal's value as input and returns an array of DOM nodes or elements. These nodes can be nested if the signal's value is a multi-dimensional array. The user is responsible for implementing the logic to handle such cases.
- * 
- * Behavior:
- * - The entire structure is re-rendered whenever the signal's value changes.
- * - Existing nodes are unbound and removed before new nodes are rendered.
+ * @class
+ * Represents a reactive list of elements
  */
 export default class ListElement {
   #signal;
   #mapFn;
   #nodes;
 
+  /**
+   * @param {Signal<T[]>} signal - A reactive signal holding an array of items.
+   * @param {(item: any, index: number) => Node} mapFn - Function mapping items to DOM nodes
+   * @returns {DocumentFragment}
+   */
   constructor(signal, mapFn) {
     if (!signal || typeof signal !== "object" || !signal.bind) {
       throw new Error(
@@ -30,8 +27,15 @@ export default class ListElement {
     const markerNode = document.createComment("mb:map");
     const tempFrag = document.createDocumentFragment();
 
-    this.#signal.bind((MUTDSignal) => {
-      const newNodes = this.#mapFn(MUTDSignal);
+    this.#signal.bind((currentItemValue) => {
+      const newNodes = currentItemValue.map((v) => {
+        const node = this.#mapFn(v);
+        if (!node) {
+          console.error(`Error expected a node but got ${node}`, this.#mapFn);
+          return;
+        }
+        return node;
+      });
 
       // all needs to be gone
       if (!newNodes.length) {
@@ -55,6 +59,8 @@ export default class ListElement {
       this.#nodes = newNodes;
     }, false);
 
-    return [markerNode, ...this.#nodes]; // this should always return an array.
+    const frag = document.createDocumentFragment();
+    frag.append(markerNode, ...this.#nodes);
+    return frag; // this should always return an array.
   }
 }

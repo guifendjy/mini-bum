@@ -1,14 +1,25 @@
-/** signal
- * parameter:
- * - initialValue: the inital value of the Signal
- * - Returns:
- * - a proxy object that has the following properties:
- * 2 - Signal.value: the current value of the signal.
- * 3 - Signal.bind: a method that takes a callback function and an optional boolean parameter.
- * Signal.bind(callback, evalAsExpression):
- * - a callback that get's called whenever the Signal's value changes.
- * - evalAsExpression: a boolean that determines whether the callback should be evaluated as an expression to an attribute or not.
+/**
+ * @template T
+ * @typedef {Object} SignalInstance
+ * @property {T} value - The current value of the signal
+ * @property {(cb: (value: T) => void, evalAsExpression?: boolean) => (() => void)|{_signal_: boolean, evaluate: Function}} bind
+ *    Subscribe to signal updates. Returns either:
+ *    - an `unbind` function, or
+ *    - a special evaluator object if `evalAsExpression` is true
+ *
+ * @example
+ * const count = signal(0);
+ * count.bind(v => console.log("Count changed:", v));
+ * count.value = 5; // triggers subscriber
+ * console.log(count.value); // 5
  */
+
+/**
+ * @template T
+ * @param {T} initialValue - The initial value of the signal
+ * @returns {SignalInstance<T>}
+ */
+
 export default function signal(initialValue) {
   const subscribers = new Map();
   const Identifier = Symbol(JSON.stringify(initialValue));

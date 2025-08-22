@@ -20,28 +20,90 @@ import { signal, $bind } from "../signal/index.js";
  */
 
 /**
- * @interface E
- * @method tag
- * Creates a DOM element of the specified tag(eg: E.div(...), E.span(...)) type. Accepts:
- * - A single value (string, number, Node, array, or reactive signal) as the element's content.
- * - An object with `children` and/or attributes to define the element's properties.
- * - No arguments, creating an empty element.
- *
- * @method fragment
- * Creates a document fragment containing the provided children. Handles arrays, Nodes, reactive signals,
- * or other valid child types, skipping invalid ones.
- *
- * @method text
- * Creates a reactive text node. Automatically detects if the provided text is a signal or a static value.
- *
- * @method list
- * Creates a reactive list of elements based on a signal and a mapping function. Automatically updates
- * when the signal changes.
- *
- * @method cond
- * Creates a reactive conditional element that updates based on a signal and a condition function.
+ * @template T
+ * @typedef { {[K in keyof T as -readonly K]: T[K]}} Writable
  */
+
+/**
+ * @callback FragmentFactory
+ * @param {...(Node|string|number|{bind: Function})} children
+ * @returns {DocumentFragment}
+ *
+ * Creates a safe document fragment with children.
+ */
+
+/**
+ * @callback TextFactory
+ * @param {string|number|{bind: Function}} text
+ * @returns {Text}
+ *
+ * Creates a reactive text node .
+ */
+
+/**
+ * @callback ListFactory
+ * @param {Signal<T>} signal - A reactive signal source
+ * @param {(item: any, index: number) => Node} mapFn - Function mapping items to DOM nodes
+ * @returns {DocumentFragment}
+ *
+ * Creates a reactive foreach list renderer.
+ */
+
+/**
+ * @callback CondFactory
+ * @param {Signal<T>} signal - A reactive signal source
+ * @param {(value: any) => Node} condFn - Function that returns a node depending on signal value
+ * @returns {ConditionalElement}
+ *
+ * Creates a reactive conditional renderer.
+ */
+
+/**
+ * A function to add reactivity to existing DOM nodes.
+ *
+ * This can be used to select nodes by a CSS selector, a single Node, or a NodeList,
+ * and then apply attributes or reactive behavior to them.
+ *
+ *  @template {keyof HTMLElementTagNameMap} T
+ * @callback Query
+ * @param {string|string[]|Node|NodeList} query
+ *   The target for reactivity. Can be:
+ *   - A CSS selector string(or an array of selectors) (e.g., `#id`, `.class`)
+ *   - A single DOM Node
+ *   - A NodeList of DOM nodes
+ * @param {Partial<Writable<HTMLElementTagNameMap[T]>>} [attributes]
+ *   Attributes or reactive bindings to apply to the selected node(s).
+ * @returns {void} Nothing is returned.
+ */
+
+/**
+ * @typedef {Object} ElementFactory
+ * @property {FragmentFactory} fragment - Create a document fragment
+ * @property {TextFactory} text - Create a text node
+ * @property {ListFactory} list - Create a reactive foreach list
+ * @property {CondFactory} cond - Create a conditional renderer
+ * @property {Query} $ - Query existing DOM nodes and add reactivity
+ *
+ * @typedef {ElementFactory & {
+ *   [K in keyof HTMLElementTagNameMap]:
+ *     (
+ *       attributes?: Partial<Writable<HTMLElementTagNameMap[K]>> & {
+ *         bind?: Function;
+ *         $bind?: Function;
+ *       },
+ *       ...children: (string|number|boolean|Node|{bind: Function;$bind?: Function})[]
+ *     ) => HTMLElementTagNameMap[K]
+ * }} FullElementFactory
+ */
+
+/**
+ * Element factory namespace.
+ * Each property is a function to create a UI element.
+ * @type {FullElementFactory}
+ */
+
 const E = _init_();
+
 
 export default E;
 export { signal, $bind };

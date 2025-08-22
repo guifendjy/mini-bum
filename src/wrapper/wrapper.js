@@ -57,9 +57,6 @@ export default function _init_() {
         child.forEach(append);
       } else if (child instanceof Node) {
         frag.appendChild(child);
-      } else if (child.node instanceof Node) {
-        // might remove this check
-        frag.appendChild(child.node);
       } else if (
         child &&
         typeof child === "object" &&
@@ -85,10 +82,8 @@ export default function _init_() {
 
   // `E.list` - reactive foreach
   E.list = (signal, mapFn) => {
-    const frag = document.createDocumentFragment();
     let list = new ListElement(signal, mapFn);
-    frag.append(...list);
-    return frag;
+    return list;
   };
 
   // `E.cond` - reactive conditional
@@ -96,5 +91,39 @@ export default function _init_() {
     return new ConditionalElement(signal, condFn);
   };
 
-  return E;
+  // E.$ - adds reactivity to a node
+  E.$ = (query, attributes = {}) => {
+    let nodes = [];
+
+    // Handle different input types
+    if (typeof query === "string") {
+      nodes = [document.querySelector(query)];
+    } else if (query instanceof Node) {
+      nodes = [query];
+    } else if (
+      Array.isArray(query) &&
+      query.every((q) => typeof q === "string")
+    ) {
+      const qNodes = query.map((q) => {
+        let n = document.querySelector(q);
+        if (!n) {
+          console.error(`Error querring '${q}' at:`, query);
+          return q;
+        }
+        return n;
+      });
+      nodes = qNodes;
+    } else if (query instanceof NodeList || query instanceof HTMLCollection) {
+      nodes = Array.from(query);
+    } else {
+      throw new Error(
+        "Invalid query: must be a selector(string), Node, NodeList, HTMLCollection, or array of selector."
+      );
+    }
+
+    // Map each DOM node to an Element instance
+    nodes.map((node) => new Element(node, Object.assign({}, attributes))); // here I use a copy of the attributes because the element removes the onMount property from the object before applying it to the element.
+  };
+
+  return Object.freeze(E); // makes it more secure so tags cannot be overriden
 }

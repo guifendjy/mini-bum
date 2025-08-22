@@ -88,7 +88,7 @@ new Element(existingNode, {
 });
 ```
 
-The `attributes` parameter supports reactive bindings for attributes and classes, while the `children` parameter can be a string, a DOM node, or an array of nodes:
+The `attributes` parameter supports reactive bindings for attributes, while the `children` parameter can be a string, a node, or an array of nodes or both:
 
 ```js
 new Element(
@@ -101,14 +101,59 @@ new Element(
 );
 ```
 
+### `class.$static — Combine Static & Reactive Classes`
+
+The class attribute accepts reactive values and a special $static key for always-on classes.
+
+```js
+import { Element, signal } from "minibum/core";
+
+const highlighted = signal(true);
+const hidden = signal(false);
+
+new Element(
+  "div",
+  {
+    class: {
+      $static: "card shadow", // permanent classes - static
+      highlighted, // toggled by `highlighted`
+      hidden, // toggled by `hidden`
+    },
+  },
+  "Hello World"
+);
+```
+
+### `Lifecycle Hooks — onMount & onUnmount`
+
+Minibum supports lifecycle hooks for elements:
+• onMount(el) — called when the element is inserted into the DOM or atleast 50% of the element is visible(intersecting).
+• onMount can return a cleanup function that runs automatically on unmount or atleast 50% of the element becomes hidden and out of focus(you can lazy load resources easily).
+
+```js
+new Element(
+  "div",
+  {
+    onMount(el) {
+      console.log("Mounted:", el);
+      const interval = setInterval(() => console.log("Tick"), 1000);
+
+      // Cleanup on unMount - optional
+      return () => clearInterval(interval);
+    },
+  },
+  "I live and die with the DOM"
+);
+```
+
+> ⚠️Note: Lifecycle hooks are per-instance. If an element is destroyed and recreated, hooks will re-run(re-register). But if the same element node is detached and re-attached manually, hooks won’t re-run.
+
 ### `new ListElement(signal, callback)`
 
 Maps over signal values and re-renders on updates.
 
 ```js
-new ListElement(itemsSignal, (arr) =>
-  arr.map((item) => new Element("li", null, item))
-);
+new ListElement(itemsSignal, (item) => new Element("li", null, item));
 ```
 
 ### `new ConditionalElement(signals, callback)`
