@@ -122,7 +122,11 @@ export default function _init_() {
     }
 
     // Map each DOM node to an Element instance
-    nodes.map((node) => new Element(node, Object.assign({}, attributes))); // here I use a copy of the attributes because the element removes the onMount property from the object before applying it to the element.
+    let elms = nodes.map((node) => {
+      const { children, ...rest } = Object.assign({}, attributes); // the element delete the attribute onMount property from the object before applying it to the element. hence here I use a copy
+      new Element(node, rest, (children || []).map(createText));
+    });
+    return elms.length === 1 ? elms[0] : elms; // return single element or array.
   };
 
   return Object.freeze(E); // makes it more secure so tags cannot be overriden
