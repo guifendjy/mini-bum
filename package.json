@@ -27,7 +27,8 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "build:watch": "rollup -c -w"
+    "build:watch": "rollup -c -w",
+    "pub:exp": "npm version prerelease --preid=experimental && npm run build && npm publish --tag experimental && git push --follow-tags"
   },
   "keywords": [
     "dom",
