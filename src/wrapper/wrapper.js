@@ -21,7 +21,7 @@ export default function _init_() {
         return new Element(tag, null, input);
       }
 
-      if (typeof input === "object" && input !== null) {
+      if (input !== null && typeof input === "object") {
         let { children, ...attributes } = input;
         if (children && !Array.isArray(children)) {
           // change it to an array if it is not.
@@ -123,8 +123,12 @@ export default function _init_() {
 
     // Map each DOM node to an Element instance
     let elms = nodes.map((node) => {
-      const { children, ...rest } = Object.assign({}, attributes); // the element delete the attribute onMount property from the object before applying it to the element. hence here I use a copy
-      new Element(node, rest, (children || []).map(createText));
+      let { children, ...rest } = Object.assign({}, attributes);
+      if (children && !Array.isArray(children)) {
+        // change it to an array if it is not.
+        children = [children];
+      }
+      return new Element(node, rest, (children || []).map(createText));
     });
     return elms.length === 1 ? elms[0] : elms; // return single element or array.
   };
