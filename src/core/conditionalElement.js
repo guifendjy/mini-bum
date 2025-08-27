@@ -10,8 +10,8 @@ export default class ConditionalElement {
   #signals;
   #condFn;
   #nodes = [];
-  #start = document.createComment("mrk:start");
-  #end = document.createComment("mrk:end");
+  #start = document.createComment("mb:start");
+  #end = document.createComment("mb:end");
   #lastEvaluation;
 
   /**

@@ -9,7 +9,7 @@ export default class ListElement {
   #signal;
   #mapFn;
   #nodes = [];
-  #lastEvaluation;
+  #lastEvaluation = [];
 
   /**
    * @param {Signal<T[]>} signal - A reactive signal holding an array of items.
