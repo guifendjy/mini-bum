@@ -33,10 +33,7 @@ export default class Element {
       (attributes.hasOwnProperty("innerHTML") ||
         attributes.hasOwnProperty("outerHTML"))
     ) {
-      console.warn(
-        "you are setting innerHTML/outerHTML dangerously.",
-        this
-      );
+      console.warn("you are setting innerHTML/outerHTML dangerously.", this);
     }
 
     this.#type = type;

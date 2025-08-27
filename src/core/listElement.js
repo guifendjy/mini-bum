@@ -1,3 +1,4 @@
+import shallowEqual from "./utils/shallowDiffing.js";
 import walkAndUnbind from "./utils/walkAndUnbind.js";
 
 /**
@@ -7,7 +8,8 @@ import walkAndUnbind from "./utils/walkAndUnbind.js";
 export default class ListElement {
   #signal;
   #mapFn;
-  #nodes;
+  #nodes = [];
+  #lastEvaluation;
 
   /**
    * @param {Signal<T[]>} signal - A reactive signal holding an array of items.
@@ -22,20 +24,30 @@ export default class ListElement {
     }
     this.#signal = signal;
     this.#mapFn = mapFn;
-    this.#nodes = [];
 
     const markerNode = document.createComment("mb:map");
     const tempFrag = document.createDocumentFragment();
 
     this.#signal.bind((currentItemValue) => {
-      const newNodes = currentItemValue.map((v) => {
-        const node = this.#mapFn(v);
-        if (!node) {
-          console.error(`Error expected a node but got ${node}`, this.#mapFn);
-          return;
-        }
-        return node;
-      });
+      // if array is the same do nothing
+      if (shallowEqual(this.#lastEvaluation, currentItemValue)) return;
+      this.#lastEvaluation = currentItemValue;
+
+      const newNodes = currentItemValue
+        .map((v) => {
+          const node = this.#mapFn(v);
+          if (!node) {
+            console.error(`Error expected a node but got ${node}`, this.#mapFn);
+            return;
+          }
+
+          if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            return Array.from(node.childNodes);
+          }
+          return node;
+        })
+        .flat()
+        .filter((n) => n); // filter out undefined and null
 
       // all needs to be gone
       if (!newNodes.length) {

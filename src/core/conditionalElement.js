@@ -1,4 +1,5 @@
 import walkAndUnbind from "./utils/walkAndUnbind.js";
+import shallowEqual from "./utils/shallowDiffing.js";
 import { $bind } from "../signal/index.js";
 
 /**
@@ -8,48 +9,73 @@ import { $bind } from "../signal/index.js";
 export default class ConditionalElement {
   #signals;
   #condFn;
+  #nodes = [];
+  #start = document.createComment("mrk:start");
+  #end = document.createComment("mrk:end");
+  #lastEvaluation;
 
   /**
    * @param {Signal<T> | Signal<T>[]} signals - A signal or array of signals to bind to.
    * @param {(value: any) => Node} condFn Function that returns a node depending on signal value
-   * @returns {HTMLElement}
+   * @returns {DOCUMENT_FRAGMENT_NODE}
    */
 
   constructor(signals, condFn) {
     this.#signals = signals;
     this.#condFn = condFn;
 
-    let markerNode = document.createComment("mrk:cond"); // Initial marker node
+    const markers = document.createDocumentFragment();
+    markers.append(this.#start, this.#end);
 
-    $bind(
-      this.#signals,
-      (values) => {
-        const nodeToRender = this.#condFn(values);
+    $bind(this.#signals, (vals) => this.#update(vals), false);
 
-        if (markerNode === nodeToRender) return; // If the node to render is the same as the marker node, do nothing
+    return markers;
+  }
 
-        if (!nodeToRender) {
-          // If no node to render, ensure markerNode is a comment
-          if (
-            markerNode.nodeType !== Node.COMMENT_NODE ||
-            markerNode.nodeValue !== "mrk:cond"
-          ) {
-            walkAndUnbind(markerNode); // Unbind signals of the current node and children
-            const commentNode = document.createComment("mrk:cond");
-            markerNode.replaceWith(commentNode);
-            markerNode = commentNode;
-          }
-          return;
-        }
+  #update(values) {
+    // avoid unnecessary re-renders with a shallow comparison
+    if (shallowEqual(this.#lastEvaluation, values)) return;
+    // diff evaluation
+    this.#lastEvaluation = values;
 
-        // If there is a node to render, replace the markerNode
-        walkAndUnbind(markerNode); // Unbind signals of the current node and children
-        markerNode.replaceWith(nodeToRender);
-        markerNode = nodeToRender; // Update markerNode to the new node
-      },
-      false
-    );
+    const nodesToRender = this.#condFn(values); // evaluate condition
 
-    return markerNode;
+    if (!nodesToRender) {
+      // if no nodes to render remove everything
+      this.#removeNodes();
+      return;
+    }
+
+    const newNodes =
+      nodesToRender.nodeType === Node.DOCUMENT_FRAGMENT_NODE
+        ? Array.from(nodesToRender.childNodes)
+        : [nodesToRender] || [];
+
+    // update nodes(clear and add new nodes)
+    this.#addNodes(newNodes);
+  }
+
+  #removeNodes() {
+    if (!this.#nodes.length) return; // nothing to remove
+
+    let current = this.#start.nextSibling;
+    while (current && current != this.#end) {
+      let next = current.nextSibling;
+      walkAndUnbind(current); // unbind any signals in the node
+      current.remove();
+      current = next;
+    }
+  }
+
+  #addNodes(newNodes) {
+    this.#removeNodes(); // remove oldnodes before proceeding
+
+    const fragment = document.createDocumentFragment();
+    this.#nodes = newNodes;
+
+    this.#nodes.forEach((node) => {
+      fragment.appendChild(node);
+    });
+    this.#start.parentNode.insertBefore(fragment, this.#end);
   }
 }

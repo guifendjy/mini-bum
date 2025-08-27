@@ -1,6 +1,6 @@
 /**
  * Subscribes one or multiple signals to a callback function.
- * 
+ *
  * ex: `$bind(signalOrSignals, callback, evalAsExpression=true)` → subscribes multiple signals at once.
  *
  * @template T
@@ -33,11 +33,8 @@ export default function $bind(signals, callback, evalAsExpression = true) {
         return console.warn("Invalid signal passed to $bind:", s);
       }
 
-      const unbund = s.bind((value) => {
-        if (value === undefined || value === null) {
-          console.warn("Signal value is undefined or null, skipping callback.");
-          return;
-        }
+      // TODO: here this seems to cause issues if you set the value as null.
+      const unbund = s.bind(() => {
         const values = signalArray.map((s) => {
           return s.value; // get the value of the signal
         });
