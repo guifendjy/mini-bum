@@ -30,6 +30,7 @@ npm install minibum@experimental
 ## Highlights
 
 - ⚡ Tiny, dependency-free
+- 🪡 Fine-grained reactivity—control
 - 📆 Built-in signals and subscriptions
 - 🧹 Dynamic DOM generation
 - ⟳ Reactive lists and conditionals

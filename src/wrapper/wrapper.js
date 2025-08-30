@@ -23,7 +23,10 @@ export default function _init_() {
 
       if (input !== null && typeof input === "object") {
         let { children, ...attributes } = input;
-        if (children && !Array.isArray(children)) {
+        if (
+          (children != undefined || children != null) &&
+          !Array.isArray(children)
+        ) {
           // change it to an array if it is not.
           children = [children];
         }
@@ -124,7 +127,10 @@ export default function _init_() {
     // Map each DOM node to an Element instance
     let elms = nodes.map((node) => {
       let { children, ...rest } = Object.assign({}, attributes);
-      if (children && !Array.isArray(children)) {
+      if (
+        (children != undefined || children != null) &&
+        !Array.isArray(children)
+      ) {
         // change it to an array if it is not.
         children = [children];
       }

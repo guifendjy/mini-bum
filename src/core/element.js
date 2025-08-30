@@ -81,7 +81,7 @@ export default class Element {
         if (attr === "class") {
           let classObject = this.#attributes[attr];
 
-          // allows adding static classes alonsgside dynamic ones
+          // new Feature allow adding $static classes alongside dynamic ones.
           if (classObject.$static) {
             let transformedStatic = Object.fromEntries(
               classObject.$static.split(" ").map((v) => [v, true])
@@ -91,20 +91,15 @@ export default class Element {
               (key) => (this.#attributes.class[key] = true)
             );
             delete this.#attributes.class.$static;
-            // done preprocessing class
+            // done preprocessing  $static
           }
 
           for (const key in classObject) {
             const value = classObject[key];
-
             // it's a none pure signal
             if (value.bind) {
               // bind it
               const unbind = value.bind((v) => {
-                if (typeof v !== "boolean")
-                  return console.error(
-                    `Error: expected a boolean value but got ${v}`
-                  );
                 if (v) {
                   element.classList.add(key);
                 } else {
@@ -116,10 +111,6 @@ export default class Element {
               // it's a pure signal
               // run evaluation by providing the applyval fn
               const unbind = value.evaluate((v) => {
-                if (typeof v !== "boolean")
-                  return console.error(
-                    `Error: expected a boolean value but got ${v}`
-                  );
                 if (v) {
                   element.classList.add(key);
                 } else {
@@ -128,20 +119,12 @@ export default class Element {
               });
               this.#unbindSignalMehtods.push(unbind);
             } else {
-              if (typeof this.#attributes.class[key] !== "boolean")
-                return console.error(
-                  `Error: expected a boolean but got ${
-                    this.#attributes.class[key]
-                  }`
-                );
-
               if (this.#attributes.class[key]) element.classList.add(key);
             }
           }
 
           return; // done processing class
         }
-
         let value = this.#attributes[attr];
 
         // here if the user just want to bind just to the value alone and not a complex binding(derived) where they provide a callback which means they do as they wish with the new value
