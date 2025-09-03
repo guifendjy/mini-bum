@@ -34,8 +34,8 @@ export default class ListElement {
       this.#lastEvaluation = currentItemValue;
 
       const newNodes = currentItemValue
-        .map((v) => {
-          const node = this.#mapFn(v);
+        .map((v, index) => {
+          const node = this.#mapFn(v, index);
           if (!node) {
             console.error(`Error expected a node but got ${node}`, this.#mapFn);
             return;
