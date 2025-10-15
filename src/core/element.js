@@ -1,4 +1,6 @@
 import LIFE_CYCLE_REGISTRY from "./utils/LIFE_CYCLE_REGISTRY.js";
+import createNode from "./utils/createNode.js";
+import setAttr from "./utils/setAttributeSmart.js";
 
 /**
  * @template T
@@ -45,13 +47,16 @@ export default class Element {
     this.#onMount = this.#attributes?.onMount || false;
     if (this.#onMount) delete this.#attributes.onMount; // removes it so it does not attach to the actual element.
 
-    const element = Object.assign(
-      // if it's an instance of HTMLElement then use it as is
+    const element =
       typeof this.#type == "string"
-        ? document.createElement(this.#type)
-        : this.#type instanceof Node && this.#type,
-      this.#attributes
-    );
+        ? createNode(this.#type)
+        : this.#type instanceof Node && this.#type;
+
+    Object.entries(this.#attributes || {}).forEach(([attr, value]) => {
+      if (typeof value !== "object") {
+        setAttr(element, attr, value);
+      }
+    });
 
     // NEW FEATURE: Support onMount directly in attributes
     if (this.#onMount && typeof this.#onMount === "function") {
@@ -136,18 +141,7 @@ export default class Element {
         if (value && typeof value === "object" && value._signal_) {
           // this handles subscription
           const unbind = value.evaluate((evaluatedExpression) => {
-            //TODO: I need a better way to handle results =>number, boolean both string or actual
-            if (
-              typeof evaluatedExpression != "number" &&
-              !evaluatedExpression &&
-              (attr == "className" || attr == "style")
-            ) {
-              element[attr] = "";
-              return;
-            }
-
-            // element[attr] = evaluatedExpression;
-            element.setAttributes(attr, evaluatedExpression); // this is safer
+            setAttr(element, attr, evaluatedExpression); // this is a smart function to set attribute
           });
           this.#unbindSignalMehtods.push(unbind); // store the unbind method for later use
         } else {
