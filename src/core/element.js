@@ -84,7 +84,10 @@ export default class Element {
           // new Feature allow adding $static classes alongside dynamic ones.
           if (classObject.$static) {
             let transformedStatic = Object.fromEntries(
-              classObject.$static.split(" ").map((v) => [v, true])
+              classObject.$static
+                .trim()
+                .split(" ")
+                .map((v) => [v, true])
             );
 
             Object.keys(transformedStatic).forEach(
@@ -143,7 +146,8 @@ export default class Element {
               return;
             }
 
-            element[attr] = evaluatedExpression;
+            // element[attr] = evaluatedExpression;
+            element.setAttributes(attr, evaluatedExpression); // this is safer
           });
           this.#unbindSignalMehtods.push(unbind); // store the unbind method for later use
         } else {

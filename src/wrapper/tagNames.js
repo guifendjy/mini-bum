@@ -1,6 +1,7 @@
 const tagNames = [
   "a",
   "abbr",
+  "acronym",
   "address",
   "area",
   "article",
@@ -10,16 +11,19 @@ const tagNames = [
   "base",
   "bdi",
   "bdo",
+  "big",
   "blockquote",
   "body",
   "br",
   "button",
   "canvas",
   "caption",
+  "center", // ← (deprecated but still valid)
   "cite",
   "code",
   "col",
   "colgroup",
+  "command", // ← (deprecated)
   "data",
   "datalist",
   "dd",
@@ -27,6 +31,7 @@ const tagNames = [
   "details",
   "dfn",
   "dialog",
+  "dir", // ← (deprecated)
   "div",
   "dl",
   "dt",
@@ -54,6 +59,7 @@ const tagNames = [
   "input",
   "ins",
   "kbd",
+  "keygen", // ← (deprecated)
   "label",
   "legend",
   "li",
@@ -61,6 +67,9 @@ const tagNames = [
   "main",
   "map",
   "mark",
+  "marquee", // ← (deprecated)
+  "menu",
+  "menuitem", // ← (deprecated)
   "meta",
   "meter",
   "nav",
@@ -71,6 +80,7 @@ const tagNames = [
   "option",
   "output",
   "p",
+  "param",
   "picture",
   "pre",
   "progress",
@@ -83,6 +93,7 @@ const tagNames = [
   "script",
   "section",
   "select",
+  "shadow", // ← (non-standard)
   "small",
   "source",
   "span",
@@ -103,6 +114,7 @@ const tagNames = [
   "title",
   "tr",
   "track",
+  "tt", // ← (deprecated)
   "u",
   "ul",
   "var",
