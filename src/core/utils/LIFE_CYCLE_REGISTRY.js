@@ -1,12 +1,4 @@
-class NodeCycleState {
-  constructor() {
-    this.mounted = false;
-    this.beforeMount = false;
-    this.afterMount = false;
-    this.beforeUnmount = false;
-    this.afterUnmount = false;
-  }
-}
+import NodeCycleState from "./NodeCycleManager.js";
 
 let LIFE_CYCLE_REGISTRY = {
   registry: new Map(), // node -> { onMount, onUnmount },
@@ -30,6 +22,7 @@ let LIFE_CYCLE_REGISTRY = {
       const record = this.registry.get(element);
       if (!record) return;
       const { onMount, state } = record;
+
       const unMount = onMount(element, state);
       // update onMount scope -> helps if unMount:() is using variables outside of it's scope
       if (typeof unMount === "function") record.onUnmount = unMount;
@@ -68,17 +61,25 @@ let LIFE_CYCLE_REGISTRY = {
             if (record) {
               const { state } = record;
 
+              //wait for element to be completly visible to do anything(life cycle hooks gets triggerd whenever state changes)
               if (entry.intersectionRatio >= 1 && !state.mounted) {
-                state.beforeMount = true;
-                this.mount(entry.target);
-                state.mounted = true;
-                state.afterMount = true;
+                state.beforeMount = true; // before mount
+
+                this.mount(entry.target); // main mount logic gets
+
+                state.afterMount = true; // after mount
+                state.beforeMount = false; // before mount
+
+                state.mounted = true; // mounted
               } else if (entry.intersectionRatio < 1 && state.mounted) {
-                state.beforeUnmount = true;
-                this.unmount(entry.target);
-                state.beforeUnmount = false;
-                state.mounted = false;
-                state.afterMount = false;
+                state.beforeUnmount = true; // before unMount
+
+                this.unmount(entry.target); // main unmount logic
+
+                state.afterUnmount = true; // after unmount
+                state.beforeUnmount = false; // before unmount
+
+                state.mounted = false; // mounted
               }
             }
           });
@@ -91,10 +92,12 @@ let LIFE_CYCLE_REGISTRY = {
       this.mutationObserver = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           mutation.removedNodes.forEach((node) => {
-            if (this.registry.has(node)) {
+            const record = this.registry.has(node);
+            if (record) {
               // Permanent removal → full cleanup
               this.unmount(node);
               this.removeFromRegistry(node);
+              record.state = new NodeCycleState();
             }
           });
         });
