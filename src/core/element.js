@@ -1,6 +1,7 @@
 import LIFE_CYCLE_REGISTRY from "./utils/LIFE_CYCLE_REGISTRY.js";
 import createNode from "./utils/createNode.js";
 import setAttr from "./utils/setAttributeSmart.js";
+import tokenizeString from "./utils/tokenizeString.js";
 
 /**
  * @template T
@@ -88,12 +89,7 @@ export default class Element {
 
           // new Feature allow adding $static classes alongside dynamic ones.
           if (classObject.$static) {
-            let transformedStatic = Object.fromEntries(
-              classObject.$static
-                .trim()
-                .split(" ")
-                .map((v) => [v, true])
-            );
+            const transformedStatic = tokenizeString(classObject.$static);
 
             Object.keys(transformedStatic).forEach(
               (key) => (this.#attributes.class[key] = true)

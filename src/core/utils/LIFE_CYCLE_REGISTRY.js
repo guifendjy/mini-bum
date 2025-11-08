@@ -1,3 +1,13 @@
+class NodeCycleState {
+  constructor() {
+    this.mounted = false;
+    this.beforeMount = false;
+    this.afterMount = false;
+    this.beforeUnmount = false;
+    this.afterUnmount = false;
+  }
+}
+
 let LIFE_CYCLE_REGISTRY = {
   registry: new Map(), // node -> { onMount, onUnmount },
   observer: null,
@@ -6,35 +16,30 @@ let LIFE_CYCLE_REGISTRY = {
   register(o) {
     const { element, onMount } = o;
     if (!this.registry.has(element)) {
-      this.initializeObserver(); // initiazes the observer
-      this.registry.set(element, { onMount, onUnmount: null, mounted: false });
+      this.initializeObserver(); // initiazes the observer| default threshold [1]
+      this.registry.set(element, {
+        onMount,
+        onUnmount: null,
+        state: new NodeCycleState(),
+      });
       this.registry.get(element) && this.intersectionObserver.observe(element); // observe the node who want to register
     }
   },
   mount(element) {
     if (this.registry.has(element)) {
-      const watchedNode = this.registry.get(element);
-
-      if (!watchedNode.mounted) {
-        const unMount = watchedNode.onMount?.(element);
-
-        if (!watchedNode.onUnmount) {
-          // save unMount cb
-          watchedNode.onUnmount = unMount;
-        }
-        // set it to true
-        watchedNode.mounted = true;
-      }
+      const record = this.registry.get(element);
+      if (!record) return;
+      const { onMount, state } = record;
+      const unMount = onMount(element, state);
+      // update onMount scope -> helps if unMount:() is using variables outside of it's scope
+      if (typeof unMount === "function") record.onUnmount = unMount;
     }
   },
   unmount(element) {
     if (this.registry.has(element)) {
-      const watchedNode = this.registry.get(element);
-
-      if (watchedNode.mounted) {
-        watchedNode.onUnmount?.();
-        // then set to false
-        watchedNode.mounted = false;
+      const record = this.registry.get(element);
+      if (record.onUnmount && typeof record.onUnmount === "function") {
+        record.onUnmount();
       }
     }
   },
@@ -55,22 +60,30 @@ let LIFE_CYCLE_REGISTRY = {
 
   initializeObserver() {
     // this is a visibility based mouting api
-    //TODO: optional but to clear space I can also implement a mutation observer which when nodes gets added the register for mouting but the key difference when unmounting it will remove the entire node from the registry so mouting it will not trigger the unmount call(which I think might be create some non intuitive behaviors.)
     if (!this.intersectionObserver) {
       this.intersectionObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              // run mount logic
+            const record = this.registry.get(entry.target);
+            if (record) {
+              const { state } = record;
 
-              this.mount(entry.target);
-            } else {
-              // run unmount logic
-              this.unmount(entry.target);
+              if (entry.intersectionRatio >= 1 && !state.mounted) {
+                state.beforeMount = true;
+                this.mount(entry.target);
+                state.mounted = true;
+                state.afterMount = true;
+              } else if (entry.intersectionRatio < 1 && state.mounted) {
+                state.beforeUnmount = true;
+                this.unmount(entry.target);
+                state.beforeUnmount = false;
+                state.mounted = false;
+                state.afterMount = false;
+              }
             }
           });
         },
-        { threshold: 0.5 } // thershold can take an array of value which Fires at multiple visibility percentages.(default at 50% -> atleast 50% of the element need to be visible to fire any mounting and same for unmounting)
+        { threshold: 1 } // threshold default 1.
       );
     }
 
