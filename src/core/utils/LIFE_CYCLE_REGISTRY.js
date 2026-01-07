@@ -1,113 +1,87 @@
-import NodeCycleState from "./NodeCycleManager.js";
-
 let LIFE_CYCLE_REGISTRY = {
-  registry: new Map(), // node -> { onMount, onUnmount },
-  observer: null,
-  intersectionObserver: null,
-  mutationObserver: null,
+  registry: new Map(),
+
   register(o) {
     const { element, onMount } = o;
-    if (!this.registry.has(element)) {
-      this.initializeObserver(); // initiazes the observer| default threshold [1]
-      this.registry.set(element, {
-        onMount,
-        onUnmount: null,
-        state: new NodeCycleState(),
-      });
-      this.registry.get(element) && this.intersectionObserver.observe(element); // observe the node who want to register
-    }
+    if (this.registry.has(element)) return;
+
+    this.initializeObservers();
+
+    const record = {
+      element,
+      onMount,
+      onUnmount: null,
+      state: "IDLE",
+      debounceTimer: null,
+    };
+
+    this.registry.set(element, record);
+    this.intersectionObserver.observe(element);
   },
-  mount(element) {
-    if (this.registry.has(element)) {
-      const record = this.registry.get(element);
+
+  handleIntersection(entries) {
+    entries.forEach((entry) => {
+      const record = this.registry.get(entry.target);
       if (!record) return;
-      const { onMount, state } = record;
 
-      const unMount = onMount(element, state);
-      // update onMount scope -> helps if unMount:() is using variables outside of it's scope
-      if (typeof unMount === "function") record.onUnmount = unMount;
-    }
-  },
-  unmount(element) {
-    if (this.registry.has(element)) {
-      const record = this.registry.get(element);
-      if (record.onUnmount && typeof record.onUnmount === "function") {
-        record.onUnmount();
+      // Use isIntersecting for stability, or a lower threshold for "unmounting"
+      const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.8;
+
+      if (isVisible && record.state !== "MOUNTED") {
+        this.executeMount(record);
+      } else if (!isVisible && record.state === "MOUNTED") {
+        // Add a micro-delay to ensure it's not a flicker from an animation frame
+        clearTimeout(record.debounceTimer);
+
+        record.debounceTimer = setTimeout(() => {
+          if (!entry.isIntersecting) this.executeUnmount(record);
+        }, 100);
       }
-    }
+    });
   },
-  removeFromRegistry(element) {
-    if (this.registry.has(element)) {
-      this.intersectionObserver.unobserve(element);
-      this.registry.delete(element);
 
-      // check if registry in empty and remove all observers they will be reinstantiated if other node gets registered(works for dynamic nodes)
-      if (this.registry.size == 0) {
-        this.intersectionObserver.disconnect();
-        this.intersectionObserver = null;
-        this.mutationObserver.disconnect();
-        this.mutationObserver = null;
+  executeMount(record) {
+    record.state = "MOUNTING";
+    const cleanup = record.onMount(record.element);
+    if (typeof cleanup === "function") record.onUnmount = cleanup;
+    record.state = "MOUNTED";
+  },
+
+  executeUnmount(record) {
+    if (record.onUnmount) {
+      record.state = "UNMOUNTING";
+      record.onUnmount();
+      record.onUnmount = null;
+    }
+    record.state = "IDLE";
+  },
+
+  initializeObservers() {
+    if (this.intersectionObserver) return;
+
+    this.intersectionObserver = new IntersectionObserver(
+      (entries) => this.handleIntersection(entries),
+      { threshold: [0, 0.95] } // Track both "gone" and "fully there"
+    );
+
+    // this removes it entirely
+    this.mutationObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.removedNodes) {
+          if (this.registry.has(node)) {
+            const record = this.registry.get(node);
+            this.executeUnmount(record);
+            this.intersectionObserver.unobserve(node);
+            this.registry.delete(node);
+          }
+        }
       }
-    }
-  },
+    });
 
-  initializeObserver() {
-    // this is a visibility based mouting api
-    if (!this.intersectionObserver) {
-      this.intersectionObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const record = this.registry.get(entry.target);
-            if (record) {
-              const { state } = record;
-
-              //wait for element to be completly visible to do anything(life cycle hooks gets triggerd whenever state changes)
-              if (entry.intersectionRatio >= 1 && !state.mounted) {
-                state.beforeMount = true; // before mount
-
-                this.mount(entry.target); // main mount logic gets
-
-                state.afterMount = true; // after mount
-                state.beforeMount = false; // before mount
-
-                state.mounted = true; // mounted
-              } else if (entry.intersectionRatio < 1 && state.mounted) {
-                state.beforeUnmount = true; // before unMount
-
-                this.unmount(entry.target); // main unmount logic
-
-                state.afterUnmount = true; // after unmount
-                state.beforeUnmount = false; // before unmount
-
-                state.mounted = false; // mounted
-              }
-            }
-          });
-        },
-        { threshold: 1 } // threshold default 1.
-      );
-    }
-
-    if (!this.mutationObserver) {
-      this.mutationObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          mutation.removedNodes.forEach((node) => {
-            const record = this.registry.has(node);
-            if (record) {
-              // Permanent removal → full cleanup
-              this.unmount(node);
-              this.removeFromRegistry(node);
-              record.state = new NodeCycleState();
-            }
-          });
-        });
-      });
-
-      this.mutationObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-    }
+    this.mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
   },
 };
 

@@ -62,11 +62,13 @@ export default function signal(initialValue) {
           return unbind;
         }
 
-        const evaluate = (applyValue) => {
-          applyValue(callback(proxy.value));
+        const evaluate = function (applyValue) {
+          if (!applyValue) callback(proxy.value);
+          else applyValue(callback(proxy.value));
 
           const cb = (value) => {
-            applyValue(callback(value));
+            if (!applyValue) callback(value);
+            else applyValue(callback(value));
           };
           subscribers.get(Identifier).add(cb);
           cb_ref = cb; // store the reference to the callback for unbinding later(for attr evaluation)

@@ -2,6 +2,22 @@ import shallowEqual from "./utils/shallowDiffing.js";
 import walkAndUnbind from "./utils/walkAndUnbind.js";
 
 /**
+ * @template T
+ * @typedef {Object} SignalInstance
+ * @property {T} value - The current value of the signal
+ * @property {(cb: (value: T) => void, evalAsExpression?: boolean) => (() => void)|{_signal_: boolean, evaluate: Function}} bind
+ *    Subscribe to signal updates. Returns either:
+ *    - an `unbind` function, or
+ *    - a special evaluator object if `evalAsExpression` is true
+ *
+ * @example
+ * const count = signal(0);
+ * count.bind(v => console.log("Count changed:", v));
+ * count.value = 5; // triggers subscriber
+ * console.log(count.value); // 5
+ */
+
+/**
  * @class
  * Represents a reactive list of elements
  */
@@ -12,7 +28,7 @@ export default class ListElement {
   #lastEvaluation = [];
 
   /**
-   * @param {Signal<T[]>} signal - A reactive signal holding an array of items.
+   * @param {SignalInstance<T[]>} signal - A reactive signal holding an array of items.
    * @param {(item: any, index: number) => Node} mapFn - Function mapping items to DOM nodes
    * @returns {DocumentFragment}
    */
@@ -47,7 +63,7 @@ export default class ListElement {
           return node;
         })
         .flat()
-        .filter((n) => n); // filter out undefined and null
+        .filter(Boolean); // filter out undefined and null
 
       // all needs to be gone
       if (!newNodes.length) {

@@ -1,6 +1,21 @@
 import walkAndUnbind from "./utils/walkAndUnbind.js";
 import shallowEqual from "./utils/shallowDiffing.js";
 import { $bind } from "../signal/index.js";
+/**
+ * @template T
+ * @typedef {Object} SignalInstance
+ * @property {T} value - The current value of the signal
+ * @property {(cb: (value: T) => void, evalAsExpression?: boolean) => (() => void)|{_signal_: boolean, evaluate: Function}} bind
+ *    Subscribe to signal updates. Returns either:
+ *    - an `unbind` function, or
+ *    - a special evaluator object if `evalAsExpression` is true
+ *
+ * @example
+ * const count = signal(0);
+ * count.bind(v => console.log("Count changed:", v));
+ * count.value = 5; // triggers subscriber
+ * console.log(count.value); // 5
+ */
 
 /**
  * @class
@@ -15,7 +30,7 @@ export default class ConditionalElement {
   #lastEvaluation;
 
   /**
-   * @param {Signal<T> | Signal<T>[]} signals - A signal or array of signals to bind to.
+   * @param {SignalInstance<T> | SignalInstance<T>[]} signals - A signal or array of signals to bind to.
    * @param {(value: any) => Node} condFn Function that returns a node depending on signal value
    * @returns {DOCUMENT_FRAGMENT_NODE}
    */

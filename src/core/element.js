@@ -74,7 +74,7 @@ export default class Element {
       if (!this.#unbindSignalMehtods.length) return;
       this.#unbindSignalMehtods.forEach((unbind) => {
         if (typeof unbind === "function") {
-          unbind(); // call the unbind function to remove the subscription
+          unbind(); // call the unbind function to remove all subscriptions
         }
       });
       this.#unbindSignalMehtods = [];

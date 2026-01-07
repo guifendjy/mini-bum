@@ -1,10 +1,26 @@
 /**
+ * @template T
+ * @typedef {Object} SignalInstance
+ * @property {T} value - The current value of the signal
+ * @property {(cb: (value: T) => void, evalAsExpression?: boolean) => (() => void)|{_signal_: boolean, evaluate: Function}} bind
+ *    Subscribe to signal updates. Returns either:
+ *    - an `unbind` function, or
+ *    - a special evaluator object if `evalAsExpression` is true
+ *
+ * @example
+ * const count = signal(0);
+ * count.bind(v => console.log("Count changed:", v));
+ * count.value = 5; // triggers subscriber
+ * console.log(count.value); // 5
+ */
+
+/**
  * Subscribes one or multiple signals to a callback function.
  *
  * ex: `$bind(signalOrSignals, callback, evalAsExpression=true)` → subscribes multiple signals at once.
  *
  * @template T
- * @param {Signal<T> | Signal<T>[]} signals - A signal or array of signals to bind.
+ * @param {SignalInstance<T> | SignalInstance<T>[]} signals - A signal or array of signals to bind.
  * @param {(value: T) => Node} callback - Function called whenever the signal changes.
  *  @param {boolean} [evalAsExpression=true] - Whether the callback should be evaluated as a reactive expression or just called as a regular function.
  * @returns {Function|{_signal_: boolean, evaluate: function(Function): Function}} - Returns an unbind function if evalAsExpression is false; otherwise returns an object for reactive evaluation.
