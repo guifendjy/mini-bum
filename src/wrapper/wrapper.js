@@ -6,34 +6,58 @@ export default function _init_() {
 
   // Core element factory with flexible argument parsing
   for (const tag of tagNames) {
-    E[tag] = (input) => {
-      if (
-        typeof input === "string" ||
-        typeof input === "number" ||
-        input instanceof Node ||
-        Array.isArray(input) ||
-        input?.bind ||
-        input?._signal_
-      ) {
-        if (!Array.isArray(input)) input = [input];
+    E[tag] = (...args) => {
+      const normalize = (input) => {
+        if (input == null) return { attributes: null, children: null };
+        if (Array.isArray(input)) return { attributes: null, children: input };
 
-        input = input.map(createText);
-        return new Element(tag, null, input);
-      }
-
-      if (input !== null && typeof input === "object") {
-        let { children, ...attributes } = input;
+        // If input is already an Element-like instance (including Conditional/List or anything with render),
+        // treat it as a single child rather than attributes.
         if (
-          (children != undefined || children != null) &&
-          !Array.isArray(children)
+          input instanceof Element ||
+          input instanceof ConditionalElement ||
+          input instanceof ListElement ||
+          (input && typeof input.render === "function")
         ) {
-          // change it to an array if it is not.
-          children = [children];
+          return { attributes: null, children: [input] };
         }
-        return new Element(tag, attributes, (children || []).map(createText));
+
+        if (
+          typeof input === "object" &&
+          !input.bind &&
+          !(input instanceof Node)
+        ) {
+          const { children, ...attrs } = input;
+          return {
+            attributes: Object.keys(attrs).length ? attrs : null,
+            children:
+              children === undefined
+                ? null
+                : Array.isArray(children)
+                ? children
+                : [children],
+          };
+        }
+        // primitives, Node, signal, functions, etc. => single child
+        return { attributes: null, children: [input] };
+      };
+
+      let attributes = null;
+      let children = null;
+
+      if (args.length === 0) {
+        // <tag />
+      } else if (args.length === 1) {
+        const n = normalize(args[0]);
+        attributes = n.attributes;
+        children = n.children;
+      } else {
+        // multiple args treated as children: <tag(a, b, c)>
+        attributes = null;
+        children = args;
       }
 
-      return new Element(tag, null); // no args
+      return new Element(tag, attributes, children);
     };
   }
 

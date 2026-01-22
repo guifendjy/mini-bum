@@ -1,3 +1,5 @@
+// @ts-ignore
+/**@internal */
 let LIFE_CYCLE_REGISTRY = {
   registry: new Map(),
 
@@ -11,7 +13,7 @@ let LIFE_CYCLE_REGISTRY = {
       element,
       onMount,
       onUnmount: null,
-      state: "IDLE",
+      state: "IDLE", // MOUNTED | MOUNTING | UNMOUNTED | UNMOUNTING
       debounceTimer: null,
     };
 
@@ -61,7 +63,7 @@ let LIFE_CYCLE_REGISTRY = {
 
     this.intersectionObserver = new IntersectionObserver(
       (entries) => this.handleIntersection(entries),
-      { threshold: [0, 0.95] } // Track both "gone" and "fully there"
+      { threshold: [0, 0.95] }, // Track both "gone" and "fully there"
     );
 
     // this removes it entirely
