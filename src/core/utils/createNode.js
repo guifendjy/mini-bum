@@ -57,7 +57,10 @@ const svgTags = new Set([
 /**
  * Create an element intelligently by tag name.
  * Automatically chooses HTML or SVG namespace.
+ * @internal
  */
+
+// @ts-ignore
 export default function createNode(tag) {
   if (svgTags.has(tag)) {
     return document.createElementNS(SVG_NS, tag);

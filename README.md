@@ -1,4 +1,4 @@
-# 🁬 MiniBum JS
+# 🁬 MiniBum JS - @2-0
 
 **MiniBum** is a lightweight, signal-based DOM micro-library designed for rapid UI prototyping, and exploration of reactive state management. It consists of two parts:
 
@@ -7,7 +7,7 @@
 
 > 🎓 **Experimental Project:** MiniBum explores reactivity, state management, and DOM rendering(client) from the ground up. Free to use, extend, and learn from.
 
-> ⚠️ This project is `experimental` and MIT licensed. Feel free to use, modify, and learn from it!
+> ⚠️ Experimental. MIT licensed.
 
 ## 🧠 Motivation
 
@@ -31,7 +31,7 @@ npm install minibum@experimental
 
 - ⚡ Tiny, dependency-free
 - 🪡 Fine-grained reactivity—control
-- 📆 Built-in signals and subscriptions
+- 📆 Built-in signals, subscriptions and directives
 - 🧹 Dynamic DOM generation
 - ⟳ Reactive lists and conditionals
 - 🁬 Designed with simplicity and learning in mind

@@ -1,3 +1,7 @@
+// @ts-ignore
+/**
+ * @internal
+ * */
 export default function tokenizeString(classString) {
   const merged = {};
   if (typeof classString === "string") {

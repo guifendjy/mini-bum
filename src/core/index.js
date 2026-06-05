@@ -1,7 +1,7 @@
 import Element from "./element.js";
 import ListElement from "./listElement.js";
 import ConditionalElement from "./conditionalElement.js";
-import { signal, $bind } from "../signal/index.js";
+import { $signal, $computed } from "../signal/signal.js";
 
 // 🍬 MINI BUM LIBRARY - CREATE DOM ELEMENTS OR ADD REACTIVITY TO EXISTING ELEMENTS🍬
 /**
@@ -22,4 +22,4 @@ import { signal, $bind } from "../signal/index.js";
  */
 
 export { Element, ListElement, ConditionalElement };
-export { signal, $bind };
+export { $signal, $computed };

@@ -7,6 +7,17 @@ const propMap = {
   rowspan: "rowSpan",
 };
 
+/**
+ * Set attributes on an Element.
+ * @internal
+ * @param {Node} el
+ * @param {String} name
+ * @param {String | Object} value
+ *@returns {void}
+ *
+ * @ts-ignore
+ *  */
+
 export default function setAttr(el, name, value) {
   applyValue(el, name, value);
 }
@@ -19,29 +30,6 @@ function applyValue(el, name, value) {
     return;
   }
 
-  // 1️⃣ Event handlers
-  if (name.startsWith("on") && typeof value === "function") {
-    const event = name.slice(2).toLowerCase();
-    el.removeEventListener(event, el[`__${event}`]);
-    el.addEventListener(event, value);
-    el[`__${event}`] = value;
-
-    return;
-  }
-
-  // 2️⃣ Style
-  if (name === "style") {
-    if (typeof value === "object") {
-      for (const [prop, val] of Object.entries(value)) {
-        el.style[prop] = val ?? "";
-      }
-    } else {
-      el.style.cssText = value;
-    }
-    return;
-  }
-
-  // 3️⃣ SVG or regular attribute
   if (isSvg) {
     // Handle xlink:href, xmlns, etc.
     if (name === "xlink:href") {
@@ -54,7 +42,35 @@ function applyValue(el, name, value) {
     return;
   }
 
-  // 4️⃣ HTML Elements (normal path)
+  if (name === "style") {
+    if (typeof value === "object") {
+      for (const [prop, val] of Object.entries(value)) {
+        if (val) {
+          // this is better than set property because it can handle css variables and other non camelCase properties
+          el.style[prop] = val;
+        } else {
+          el.style.removeProperty(prop);
+        }
+      }
+    } else {
+      el.style.cssText = value;
+    }
+    return;
+  }
+
+  if (name === "className" || name === "class") {
+    if (typeof value === "object") {
+      for (const [prop, val] of Object.entries(value)) {
+        // allows support for multiple classes in a single key, e.g. { "class1 class2": true }
+        val && el.classList.add(...prop.split(" ").filter(Boolean));
+        !val && el.classList.remove(...prop.split(" ").filter(Boolean));
+      }
+    } else {
+      el.className = value;
+    }
+    return;
+  }
+
   if (name.startsWith("data-") || name.startsWith("aria-")) {
     el.setAttribute(name, value);
     return;
@@ -89,4 +105,24 @@ function removeAttr(el, name) {
     } catch {}
   }
   el.removeAttribute(name);
+}
+
+function sanitizeString(input) {
+  let Booleans = [
+    "true",
+    "false",
+    "null",
+    "undefined",
+    "NaN",
+    "NaN",
+    "Infinity",
+    "-Infinity",
+  ];
+
+  let sanitizedString = input;
+  Booleans.forEach((booleanValue) => {
+    const regex = new RegExp(`\\b${booleanValue}\\b`, "g");
+    sanitizedString = sanitizedString.replace(regex, "");
+  });
+  return sanitizedString.trim();
 }

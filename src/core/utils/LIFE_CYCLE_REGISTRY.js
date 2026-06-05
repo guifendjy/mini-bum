@@ -1,10 +1,17 @@
 // @ts-ignore
-/**@internal */
+
+/**
+ * this is an internal tool
+ * @internal
+ */
 let LIFE_CYCLE_REGISTRY = {
   registry: new Map(),
-
+  /** @type {IntersectionObserver} */
+  intersectionObserver: null,
+  /** @type {MutationObserver} */
+  mutationObserver: null,
   register(o) {
-    const { element, onMount } = o;
+    const { element, onMount, observeOnce = true } = o;
     if (this.registry.has(element)) return;
 
     this.initializeObservers();
@@ -13,6 +20,7 @@ let LIFE_CYCLE_REGISTRY = {
       element,
       onMount,
       onUnmount: null,
+      observeOnce,
       state: "IDLE", // MOUNTED | MOUNTING | UNMOUNTED | UNMOUNTING
       debounceTimer: null,
     };
@@ -31,7 +39,11 @@ let LIFE_CYCLE_REGISTRY = {
 
       if (isVisible && record.state !== "MOUNTED") {
         this.executeMount(record);
-      } else if (!isVisible && record.state === "MOUNTED") {
+      } else if (
+        !isVisible &&
+        record.state === "MOUNTED" &&
+        !record.observeOnce
+      ) {
         // Add a micro-delay to ensure it's not a flicker from an animation frame
         clearTimeout(record.debounceTimer);
 
@@ -47,6 +59,10 @@ let LIFE_CYCLE_REGISTRY = {
     const cleanup = record.onMount(record.element);
     if (typeof cleanup === "function") record.onUnmount = cleanup;
     record.state = "MOUNTED";
+
+    if (record.observeOnce) {
+      this.intersectionObserver.unobserve(record.element);
+    }
   },
 
   executeUnmount(record) {

@@ -1,17 +1,20 @@
 {
   "name": "minibum",
-  "version": "1.0.10",
-  "description": "🍬This is an educational project that explores state management,reactive UI patterns, and DOM rendering using plain JavaScript. it has two parts the core and a wrapper.",
+  "version": "2.0.0",
+  "description": "🍬@2.0. This is an educational project that explores state management,reactive UI patterns, and DOM rendering using plain JavaScript. it has two parts the core and a wrapper.",
   "module": "./dist/minibum.wrapper.js",
+  "types": "./dist/wrapper.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/wrapper.d.ts",
       "import": "./dist/minibum.wrapper.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/minibum.core.js"
     },
     "./min": {
       "import": "./dist/minibum.wrapper.min.js"
-    },
-    "./core": {
-      "import": "./dist/minibum.core.js"
     },
     "./core.min": {
       "import": "./dist/minibum.core.min.js"
@@ -27,15 +30,18 @@
     "url": "https://github.com/guifendjy/mini-bum"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && npm run build:types",
     "build:watch": "rollup -c -w",
-    "pub:patch": "npm version patch --no-git-tag-version && npm run build && npm publish --tag experimental"
+    "build:types": "npx tsc -p tsconfig.core.json && npx tsc -p tsconfig.wrapper.json"
   },
   "keywords": [
+    "vanilla-js",
+    "javascript",
+    "state-management",
+    "signal",
     "dom",
     "reactive",
     "ui",
-    "library",
     "minibum",
     "mini-bum"
   ],
@@ -45,7 +51,10 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
     "rollup": "^2.79.2",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "tsc": "^2.0.4",
+    "typescript": "^5.9.3"
   }
 }

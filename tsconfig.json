@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "allowJs": true,
+    "stripInternal": true,
+    "checkJs": false,
+    "emitDeclarationOnly": true,
+    "ignoreDeprecations": "6.0",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "esnext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}

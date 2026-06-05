@@ -1,96 +1,126 @@
-import walkAndUnbind from "./utils/walkAndUnbind.js";
-import shallowEqual from "./utils/shallowDiffing.js";
-import { $bind } from "../signal/index.js";
+import shallowEqual from "./utils/shallowEqual.js";
+import { $computed } from "../signal/signal.js";
+import uniqid from "./utils/uniqId.js";
+
+/** @template T @typedef {import("./Signal.js").default<T>} Signal */
+
 /**
- * @template T
- * @typedef {Object} SignalInstance
- * @property {T} value - The current value of the signal
- * @property {(cb: (value: T) => void, evalAsExpression?: boolean) => (() => void)|{_signal_: boolean, evaluate: Function}} bind
- *    Subscribe to signal updates. Returns either:
- *    - an `unbind` function, or
- *    - a special evaluator object if `evalAsExpression` is true
- *
- * @example
- * const count = signal(0);
- * count.bind(v => console.log("Count changed:", v));
- * count.value = 5; // triggers subscriber
- * console.log(count.value); // 5
+ * A renderable instance expected by ConditionalElement.
+ * @template [R=any]
+ * @typedef {Object} Renderable
+ * @property {function(): Renderable<R>} render - Render and return the instance with .element populated
+ * @property {Node} element - DOM node produced by render()
+ * @property {function(): void} destroy - Cleanup method called when the instance is removed
  */
 
 /**
- * @class
- * Represents a reactive conditional renderer.
+ * Signal input accepted by ConditionalElement: single signal or an array of signals.
+ * @template [T=any]
+ * @typedef {Signal<T> | Array<Signal<T>>} SignalOrList
+ */
+
+/**
+ * ConditionalElement manages dynamic mounting/unmounting of views based on signal state.
+ * @template T - The type of value(s) held by the signals.
+ * @template [R=any] - The type of Renderable returned by the condition function.
  */
 export default class ConditionalElement {
+  /** @type {SignalOrList<T>} */
   #signals;
+  /** @type {(values: T | T[]) => (Renderable<R> | null)} */
   #condFn;
-  #nodes = [];
-  #start = document.createComment("mb:start");
-  #end = document.createComment("mb:end");
-  #lastEvaluation;
+  /** @type {T | T[] | null} */
+  #lastEvaluation = null;
+  /** @type {Renderable<R> | null} */
+  #instance = null;
+  #scheduled = false;
 
   /**
-   * @param {SignalInstance<T> | SignalInstance<T>[]} signals - A signal or array of signals to bind to.
-   * @param {(value: any) => Node} condFn Function that returns a node depending on signal value
-   * @returns {DOCUMENT_FRAGMENT_NODE}
+   * @param {SignalOrList<T>} signals - A signal or array of signals to bind to.
+   * @param {(values: T | T[]) => (Renderable<R> | null)} condFn - Function that returns a renderable instance.
    */
-
   constructor(signals, condFn) {
+    /** @type {Comment | null} */
+    this.element = null;
     this.#signals = signals;
     this.#condFn = condFn;
-
-    const markers = document.createDocumentFragment();
-    markers.append(this.#start, this.#end);
-
-    $bind(this.#signals, (vals) => this.#update(vals), false);
-
-    return markers;
   }
 
+  /**
+   * Create a comment placeholder and start listening to signals.
+   * @returns {this}
+   */
+  render() {
+    this.element = document.createComment(`m:${uniqid("_", 3)}`);
+
+    // Normalize signals to array for $computed
+    const signalArray = Array.isArray(this.#signals)
+      ? this.#signals
+      : [this.#signals];
+
+    $computed((...args) => {
+      // args is an array of values from the signals
+      // if single signal, we want the first arg, otherwise the whole array
+      const values = Array.isArray(this.#signals) ? args : args[0];
+      this.#scheduleUpdate(() => this.#update(values));
+    }, signalArray);
+
+    return this;
+  }
+
+  /**
+   * Internal update handler.
+   * @param {T | T[]} values - current signal value or values.
+   */
   #update(values) {
-    // avoid unnecessary re-renders with a shallow comparison
     if (shallowEqual(this.#lastEvaluation, values)) return;
-    // diff evaluation
     this.#lastEvaluation = values;
 
-    const nodesToRender = this.#condFn(values); // evaluate condition
+    let evaluatedElement = this.#condFn(values);
 
-    if (!nodesToRender) {
-      // if no nodes to render remove everything
-      this.#removeNodes();
+    // Explicitly check for the interface before calling render
+    if (evaluatedElement && typeof evaluatedElement.render === "function") {
+      evaluatedElement = evaluatedElement.render();
+    }
+
+    if (!evaluatedElement) {
+      this.#cleanup();
       return;
     }
 
-    const newNodes =
-      nodesToRender.nodeType === Node.DOCUMENT_FRAGMENT_NODE
-        ? Array.from(nodesToRender.childNodes)
-        : [nodesToRender] || [];
+    if (this.#instance) {
+      this.#cleanup();
+    }
 
-    // update nodes(clear and add new nodes)
-    this.#addNodes(newNodes);
-  }
-
-  #removeNodes() {
-    if (!this.#nodes.length) return; // nothing to remove
-
-    let current = this.#start.nextSibling;
-    while (current && current != this.#end) {
-      let next = current.nextSibling;
-      walkAndUnbind(current); // unbind any signals in the node
-      current.remove();
-      current = next;
+    // Mount logic
+    if (this.element && evaluatedElement.element) {
+      this.element.after(evaluatedElement.element);
+      this.#instance = evaluatedElement;
     }
   }
 
-  #addNodes(newNodes) {
-    this.#removeNodes(); // remove oldnodes before proceeding
+  #cleanup() {
+    if (this.#instance) {
+      try {
+        this.#instance.destroy();
+      } catch (e) {
+        // Suppress cleanup errors
+      }
+      this.#instance = null;
+    }
+  }
 
-    const fragment = document.createDocumentFragment();
-    this.#nodes = newNodes;
+  /**
+   * Batch updates into a single microtask.
+   * @param {() => void} fn
+   */
+  #scheduleUpdate(fn) {
+    if (this.#scheduled) return;
+    this.#scheduled = true;
 
-    this.#nodes.forEach((node) => {
-      fragment.appendChild(node);
+    queueMicrotask(() => {
+      this.#scheduled = false;
+      fn();
     });
-    this.#start.parentNode.insertBefore(fragment, this.#end);
   }
 }

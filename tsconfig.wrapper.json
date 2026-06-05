@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outFile": "./dist/wrapper.d.ts"
+  },
+  "include": ["src/wrapper/index.js"]
+}

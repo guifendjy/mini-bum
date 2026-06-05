@@ -1,5 +1,5 @@
 import _init_ from "./wrapper.js";
-import { signal, $bind } from "../signal/index.js";
+import { $signal, $computed } from "../signal/signal.js";
 
 // 🍬 MINI BUM LIBRARY - CREATE DOM ELEMENTS OR ADD REACTIVITY TO EXISTING ELEMENTS🍬
 /**
@@ -20,42 +20,82 @@ import { signal, $bind } from "../signal/index.js";
  */
 
 /**
- * @template T
- * @typedef { {[K in keyof T as -readonly K]: T[K]}} Writable
+ * Type helpers exposed for TypeScript-aware editors and d.ts generation.
+ *
+ * Note: For full TypeScript semantics you can redeclare in a .d.ts:
+ *   type Writable<T> = { -readonly [K in keyof T]: T[K] }
+ */
+
+/** @template T @typedef {import("./Signal.js").default<T>} Signal */
+
+/**
+ * @typedef {import("../core/element.js").ElementInterface} ElementInterface
  */
 
 /**
  * @callback FragmentFactory
- * @param {...(Node|string|number|{bind: Function})} children
- * @returns {DocumentFragment}
+ * @param {...(Node|string|number|Signal<any>)} children
+ * @returns {ElementInterface}
  *
  * Creates a safe document fragment with children.
+ *
+ * @example
+ * E.fragment(
+ *   E.div("Fragment Child 1"),
+ *   E.div("Fragment Child 2"),
+ *   E.div("Fragment Child 3")
+ * );
  */
 
 /**
  * @callback TextFactory
- * @param {string|number|{bind: Function}} text
- * @returns {Text}
+ * @template T
+ * @param {string|number|Signal} text
+ * @returns {ElementInterface}
  *
- * Creates a reactive text node .
+ * Creates a reactive text node.
+ *
+ * @example
+ * E.text($signal("Hello, World!"));
  */
 
 /**
  * @callback ListFactory
- * @param {Signal<T>} signal - A reactive signal source
+ * @template T
+ * @param {Signal} signal - A reactive signal source
  * @param {(item: any, index: number) => Node} mapFn - Function mapping items to DOM nodes
- * @returns {DocumentFragment}
+ * @returns {ElementInterface}
  *
  * Creates a reactive foreach list renderer.
+ *
+ * @example
+ * E.list($signal([1, 2, 3]), (item, index) =>
+ *   E.div({ class: "list-item" }, `Item ${index}: ${item}`)
+ * );
  */
 
 /**
  * @callback CondFactory
- * @param {Signal<T>} signal - A reactive signal source
+ * @template T
+ * @param {Signal} signal - A reactive signal source
  * @param {(value: any) => Node} condFn - Function that returns a node depending on signal value
- * @returns {ConditionalElement}
+ * @returns {ElementInterface}
  *
  * Creates a reactive conditional renderer.
+ *
+ * @example
+ * E.cond($signal(true), (v) => {
+ *   console.log("Conditional render, value:", v);
+ *   return E.div({ class: "conditional" }, "Condition is ", v.toString());
+ * });
+ */
+
+/**
+ * @template T
+ * @typedef {Object} Writable
+ * @description
+ * A lightweight JSDoc placeholder for "writable" mapped types.
+ * For exact TypeScript behavior, declare `type Writable<T> = {-readonly [K in keyof T]: T[K]}` in a .d.ts file.
  */
 
 /**
@@ -64,46 +104,45 @@ import { signal, $bind } from "../signal/index.js";
  * This can be used to select nodes by a CSS selector, a single Node, or a NodeList,
  * and then apply attributes or reactive behavior to them.
  *
- *  @template {keyof HTMLElementTagNameMap} T
+ * @template {keyof HTMLElementTagNameMap} T
  * @callback Query
  * @param {string|string[]|Node|NodeList} query
  *   The target for reactivity. Can be:
- *   - A CSS selector string(or an array of selectors) (e.g., `#id`, `.class`)
+ *   - A CSS selector string (or an array of selectors) (e.g., `#id`, `.class`)
  *   - A single DOM Node
  *   - A NodeList of DOM nodes
  * @param {Partial<Writable<HTMLElementTagNameMap[T]>>} [attributes]
  *   Attributes or reactive bindings to apply to the selected node(s).
- * @returns {void} Nothing is returned.
+ * @returns {ElementInterface|ElementInterface[]|void}
+ *
+ * @example
+ * E.$("body", { style: "background-color: lightyellow;" });
  */
 
 /**
  * @typedef {Object} ElementFactory
  * @property {FragmentFactory} fragment - Create a document fragment
- * @property {TextFactory} text - Create a text node
  * @property {ListFactory} list - Create a reactive foreach list
  * @property {CondFactory} cond - Create a conditional renderer
- * @property {Query} $ - Query existing DOM nodes and add reactivity
- *
+ * @property {Query<any>} $ - Query existing DOM nodes and add reactivity
+ */
+
+/**
+ * @typedef {import("../core/element.js").ElementProps} ElementProps
+ */
+
+/**
  * @typedef {ElementFactory & {
  *   [K in keyof HTMLElementTagNameMap]:
  *     (
- *       attributes?: Partial<Writable<HTMLElementTagNameMap[K]>> & {
- *         bind?: Function;
- *         $bind?: Function;
- *       },
- *       ...children: (string|number|boolean|Node|{bind: Function;$bind?: Function})[]
+ *       attributes?: Partial<Writable<HTMLElementTagNameMap[K]>> & ElementProps,
+ *       ...children: (string|number|boolean|Node)[]
  *     ) => HTMLElementTagNameMap[K]
  * }} FullElementFactory
  */
 
-/**
- * Element factory namespace.
- * Each property is a function to create a UI element.
- * @type {FullElementFactory}
- */
-
+/** @type {FullElementFactory} */
 const E = _init_();
 
-
 export default E;
-export { signal, $bind };
+export { $signal, $computed };

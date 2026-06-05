@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outFile": "./dist/core.d.ts"
+  },
+  "include": ["src/core/index.js"]
+}
