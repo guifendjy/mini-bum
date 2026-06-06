@@ -2,7 +2,6 @@ import LIFE_CYCLE_REGISTRY from "./utils/LIFE_CYCLE_REGISTRY.js";
 import createNode from "./utils/createNode.js";
 import setAttr from "./utils/setAttributeSmart.js";
 import tokenizeString from "./utils/tokenizeString.js";
-import setSubattributes from "./utils/setSubattributes.js";
 import shallowEqual from "./utils/shallowEqual.js";
 import isNotElementInstance from "./utils/isNotElementInstance.js";
 
@@ -292,8 +291,7 @@ export default class Element {
         Object.entries(value).forEach(([subAttr, subBindings]) => {
           subBindings.forEach(([key, val]) => {
             let unbindMethod = val.bind((value) => {
-              if (subAttr == "class") subAttr = "className"; // handle class aliasing for sub bindings(move this dow to setSubattributes maybe? since it can also be used for style sub attributes and in general it can be used for any attribute with sub attributes in the future if needed).
-              setSubattributes(this.element, { [subAttr]: { [key]: value } }); // this only supports className and style for now since those are the only ones with sub attributes but it can be extended to support more in the future if needed (like data- or aria- attributes).
+              setAttr(this.element, subAttr, { [key]: value }); // this only supports className and style for now since those are the only ones with sub attributes but it can be extended to support more in the future if needed (like data- or aria- attributes).
             });
             this.#unSubs.push(unbindMethod);
           });
@@ -320,7 +318,8 @@ export default class Element {
             this.#twoWayBinding(this.element, value);
           } else
             throw new Error(
-              `Error: expected a SignalInterface to hold the reference of the Node but got: `,value
+              `Error: expected a SignalInterface to hold the reference of the Node but got: `,
+              value,
             );
           break;
         case "$bindGroup":
@@ -328,7 +327,8 @@ export default class Element {
             this.#twoWayBindingGroup(this.element, value);
           } else
             throw new Error(
-              `Error: expected a SignalInterface to hold the reference of the Node but got: `,value
+              `Error: expected a SignalInterface to hold the reference of the Node but got: `,
+              value,
             );
           break;
         case "onMount":

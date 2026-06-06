@@ -22,6 +22,16 @@ export default function setAttr(el, name, value) {
   applyValue(el, name, value);
 }
 
+function removeAttr(el, name) {
+  const prop = propMap[name] || name;
+  if (name in el) {
+    try {
+      el[prop] = typeof el[prop] === "boolean" ? false : "";
+    } catch {}
+  }
+  el.removeAttribute(name);
+}
+
 function applyValue(el, name, value) {
   const isSvg = el.namespaceURI === "http://www.w3.org/2000/svg";
 
