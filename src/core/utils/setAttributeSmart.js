@@ -33,8 +33,13 @@ function applyValue(el, name, value) {
   if (isSvg) {
     if (name === "xlink:href") {
       el.setAttributeNS("http://www.w3.org/1999/xlink", "href", value);
-    } else if (name === "className") {
-      setClasses(el, value);
+    } else if (name === "className" || name === "class") {
+      // note: cannot set prop 'className' onto svg element.
+      if (typeof value === "object") {
+        setClasses(el, value);
+      } else if (typeof value == "string") {
+        el.setAttribute("class", sanitizeClassString(value));
+      }
     } else {
       el.setAttribute(name, value);
     }
