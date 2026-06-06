@@ -31,11 +31,10 @@ function applyValue(el, name, value) {
   }
 
   if (isSvg) {
-    // Handle xlink:href, xmlns, etc.
     if (name === "xlink:href") {
       el.setAttributeNS("http://www.w3.org/1999/xlink", "href", value);
     } else if (name === "className") {
-      el.setAttribute("class", value);
+      setClasses(el, value);
     } else {
       el.setAttribute(name, value);
     }
@@ -43,31 +42,12 @@ function applyValue(el, name, value) {
   }
 
   if (name === "style") {
-    if (typeof value === "object") {
-      for (const [prop, val] of Object.entries(value)) {
-        if (val) {
-          // this is better than set property because it can handle css variables and other non camelCase properties
-          el.style[prop] = val;
-        } else {
-          el.style.removeProperty(prop);
-        }
-      }
-    } else {
-      el.style.cssText = value;
-    }
+    setStyles(el, value);
     return;
   }
 
   if (name === "className" || name === "class") {
-    if (typeof value === "object") {
-      for (const [prop, val] of Object.entries(value)) {
-        // allows support for multiple classes in a single key, e.g. { "class1 class2": true }
-        val && el.classList.add(...prop.split(" ").filter(Boolean));
-        !val && el.classList.remove(...prop.split(" ").filter(Boolean));
-      }
-    } else {
-      el.className = value;
-    }
+    setClasses(el, value);
     return;
   }
 
@@ -76,20 +56,17 @@ function applyValue(el, name, value) {
     return;
   }
 
-  // Boolean attributes
+  const prop = propMap[name] || name;
+
   if (typeof value === "boolean") {
-    const prop = propMap[name] || name;
     if (prop in el) {
       el[prop] = value;
     } else {
-      if (value) el.setAttribute(name, "");
-      else el.removeAttribute(name);
+      value ? el.setAttribute(name, "") : el.removeAttribute(name);
     }
     return;
   }
 
-  // Fallback: property or attribute
-  const prop = propMap[name] || name;
   if (prop in el) {
     el[prop] = value;
   } else {
@@ -97,32 +74,42 @@ function applyValue(el, name, value) {
   }
 }
 
-function removeAttr(el, name) {
-  const prop = propMap[name] || name;
-  if (name in el) {
-    try {
-      el[prop] = typeof el[prop] === "boolean" ? false : "";
-    } catch {}
+function setClasses(el, value) {
+  if (typeof value === "object") {
+    for (const [prop, val] of Object.entries(value)) {
+      el.classList[val ? "add" : "remove"](...prop.split(" ").filter(Boolean));
+    }
+  } else {
+    el.className = sanitizeClassString(value);
   }
-  el.removeAttribute(name);
 }
 
-function sanitizeString(input) {
-  let Booleans = [
-    "true",
-    "false",
-    "null",
-    "undefined",
-    "NaN",
-    "NaN",
-    "Infinity",
-    "-Infinity",
-  ];
+function setStyles(el, value) {
+  if (typeof value === "object") {
+    for (const [prop, val] of Object.entries(value)) {
+      val ? (el.style[prop] = val) : el.style.removeProperty(prop);
+    }
+  } else {
+    el.style.cssText = sanitizeStyleString(value);
+  }
+}
 
-  let sanitizedString = input;
-  Booleans.forEach((booleanValue) => {
-    const regex = new RegExp(`\\b${booleanValue}\\b`, "g");
-    sanitizedString = sanitizedString.replace(regex, "");
-  });
-  return sanitizedString.trim();
+function sanitizeClassString(value) {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter(
+      (token) =>
+        !/^(?:true|false|null|undefined|NaN|Infinity|-Infinity)$/.test(token),
+    )
+    .join(" ");
+}
+
+function sanitizeStyleString(value) {
+  return value
+    .replace(/\b(?:true|false|null|undefined|NaN|Infinity|-Infinity)\b/g, "")
+    .trim()
+    .replace(/\s*;\s*/g, ";")
+    .replace(/;;+/g, ";")
+    .replace(/^;|;$/g, "");
 }
