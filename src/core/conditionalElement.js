@@ -59,8 +59,7 @@ export default class ConditionalElement {
       : [this.#signals];
 
     $computed((...args) => {
-      // args is an array of values from the signals
-      // if single signal, we want the first arg, otherwise the whole array
+      // normalize args, to make it predictable
       const values = Array.isArray(this.#signals) ? args : args[0];
       this.#scheduleUpdate(() => this.#update(values));
     }, signalArray);
@@ -73,6 +72,7 @@ export default class ConditionalElement {
    * @param {T | T[]} values - current signal value or values.
    */
   #update(values) {
+
     if (shallowEqual(this.#lastEvaluation, values)) return;
     this.#lastEvaluation = values;
 
