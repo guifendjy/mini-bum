@@ -209,7 +209,7 @@ export default class Element {
 
     for (let i = 0; i < newInstance.children.length; i++) {
       const newChildInstance = newInstance.children[i];
-      this.isInstanceOfMB(this.children[i]) &&
+      isInstanceOfMB(this.children[i]) &&
         this.children[i]?.updateProps(newChildInstance);
     }
   }
