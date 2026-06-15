@@ -208,9 +208,10 @@ export default class Element {
     this.rawProps = newProps || {};
 
     for (let i = 0; i < newInstance.children.length; i++) {
+      // List and Cond Element does not have update props function
+      if (!(this.children[i] instanceof Element)) continue;
       const newChildInstance = newInstance.children[i];
-      isInstanceOfMB(this.children[i]) &&
-        this.children[i]?.updateProps(newChildInstance);
+      this.children[i].updateProps(newChildInstance);
     }
   }
 
