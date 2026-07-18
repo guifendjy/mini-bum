@@ -1,6 +1,6 @@
 {
   "name": "minibum",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "🍬@2 This is an educational project that explores state management,reactive UI patterns, and DOM rendering using plain JavaScript. it has two parts the core and a wrapper.",
   "module": "./dist/minibum.wrapper.js",
   "types": "./dist/wrapper.d.ts",
