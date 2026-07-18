@@ -4,6 +4,7 @@ import setAttr from "./utils/setAttributeSmart.js";
 import tokenizeString from "./utils/tokenizeString.js";
 import shallowEqual from "./utils/shallowEqual.js";
 import isNotElementInstance from "./utils/isNotElementInstance.js";
+import Signal from "../signal/Signal_instance.js";
 
 /** @template T @typedef {import("./Signal.js").default<T>} SignalInterface */
 /**
@@ -258,10 +259,9 @@ export default class Element {
 
         // reactive SignalInterface -> wrap in an Element around a text node with a binding to textContent
         if (this.#isSignalInterface(child)) {
-          const textNode = new Element(document.createTextNode(""), {
+          return new Element(document.createTextNode(""), {
             textContent: child,
           });
-          return textNode;
         }
 
         // primitives (string/number/boolean) -> wrap in an Element around a text node
@@ -589,7 +589,11 @@ export default class Element {
   }
 
   #isSignalInterface(value) {
-    return value && value.constructor.name === "Signal";
+    return (
+      typeof value == "object" &&
+      value instanceof Signal &&
+      typeof value.bind === "function"
+    );
   }
 
   #isSpecial(value) {
