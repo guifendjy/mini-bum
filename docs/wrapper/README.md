@@ -7,7 +7,7 @@ High-level syntax sugar wrapper for MiniBum Core. Great for quick prototyping an
 ## Installation
 
 ```bash
-npm install minibum@experimental
+npm install minibum
 
 ```
 
