@@ -24,7 +24,7 @@ While MiniBum isn't meant to replace full-featured frameworks, it serves as a mi
 ## Installation
 
 ```bash
-npm install minibum@experimental
+npm install minibum
 ```
 
 ## Highlights
