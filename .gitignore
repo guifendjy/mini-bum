@@ -6,4 +6,4 @@
 .env
 .vscode/
 index.html
-types
+package-lock.json

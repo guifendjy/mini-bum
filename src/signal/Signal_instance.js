@@ -72,10 +72,10 @@ export default class Signal {
    * @param {(v: T) => U} computed Mapping function.
    * @returns {Signal<U>}  <-- Fixed: Using Class name 'Signal' instead of SignalInstance
    */
-  derived(computed) {
-    const derivedSignal = new Signal(computed(this.value));
+  derived(fnc) {
+    const derivedSignal = new Signal(fnc(this.value));
     this.bind((v) => {
-      derivedSignal.value = computed(v);
+      derivedSignal.value = fnc(v);
     });
     return derivedSignal;
   }

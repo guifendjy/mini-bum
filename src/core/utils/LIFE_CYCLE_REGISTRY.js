@@ -10,8 +10,15 @@ let LIFE_CYCLE_REGISTRY = {
   intersectionObserver: null,
   /** @type {MutationObserver} */
   mutationObserver: null,
+  /**
+   * @param {Object} o - Registration options
+   * @param {HTMLElement} o.element - Target element to observe
+   * @param {(el: HTMLElement) => (() => void) | void} o.onMount - Mount callback, can return cleanup function
+   * @param {boolean} [o.replayOnVisible=false] - If true, re-execute mount/unmount on visibility toggle. If false, execute once and only cleanup on DOM removal.
+   */
+
   register(o) {
-    const { element, onMount, observeOnce = true } = o;
+    const { element, onMount, replayOnVisible = false } = o;
     if (this.registry.has(element)) return;
 
     this.initializeObservers();
@@ -20,7 +27,7 @@ let LIFE_CYCLE_REGISTRY = {
       element,
       onMount,
       onUnmount: null,
-      observeOnce,
+      replayOnVisible,
       state: "IDLE", // MOUNTED | MOUNTING | UNMOUNTED | UNMOUNTING
       debounceTimer: null,
     };
@@ -42,7 +49,7 @@ let LIFE_CYCLE_REGISTRY = {
       } else if (
         !isVisible &&
         record.state === "MOUNTED" &&
-        !record.observeOnce
+        record.replayOnVisible
       ) {
         // Add a micro-delay to ensure it's not a flicker from an animation frame
         clearTimeout(record.debounceTimer);
@@ -60,7 +67,7 @@ let LIFE_CYCLE_REGISTRY = {
     if (typeof cleanup === "function") record.onUnmount = cleanup;
     record.state = "MOUNTED";
 
-    if (record.observeOnce) {
+    if (!record.replayOnVisible) {
       this.intersectionObserver.unobserve(record.element);
     }
   },

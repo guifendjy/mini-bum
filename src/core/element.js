@@ -76,7 +76,7 @@ export default class Element {
   #listeners = [];
   #bindings = [];
   #unSubs = [];
-  #specialAttributes = ["$ref", "$bind", "$bindGroup", "$static", "onMount"]; // should probably be a constant somewhere else.
+  #specialAttributes = ["$ref", "$bind", "$bindGroup", "$static", "onMount", "replayOnVisible"]; // should probably be a constant somewhere else.
   #directives = {};
   #tag = "";
 
@@ -338,6 +338,8 @@ export default class Element {
             LIFE_CYCLE_REGISTRY.register({
               element: this.element,
               onMount: value,
+              // optional: if true, re-execute mount/unmount on visibility toggle. If false, execute once and only cleanup on DOM removal.
+              replayOnVisible: this.#directives?.replayOnVisible || false,
             });
           }
       }
@@ -607,7 +609,7 @@ export default class Element {
   }
 }
 
-// grabs a value and keeps track of its type and you can then convert to keep it stable
+// grabs a value and keeps track of its type and you can then convert it to keep it stable
 // @ts-ignore
 const typeState = (val) => ({
   type: val instanceof Date ? "date" : typeof val,

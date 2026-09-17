@@ -159,12 +159,14 @@ Directives are property keys prefixed with $ (or onMount) that trigger internal 
 - $bind: Two-way binding for form inputs and.
 - $bindGroup: Group binding for radio/checkbox sets (radio -> single value, checkbox -> array).
 - onMount: Lifecycle hook (must be a function).
+- replayOnVisible: If true, re-runs mount/unmount hooks when visibility changes. Defaults to false; hooks run once, and cleanup runs when the node leaves the DOM.
 
 Example:
 
 ```js
 new Element("div", {
   $ref: myRefSignal,
+  replayOnVisible: true, // default: false. re-runs onMount on visibilty toggle.
   onMount: () => console.log("Mounted"),
   children: [
     new Element("input", { $bind: nameSignal }),
