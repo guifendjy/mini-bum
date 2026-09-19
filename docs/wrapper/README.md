@@ -19,7 +19,7 @@ import E, { $signal, $computed } from "minibum";
 // Counter App
 const count = $signal(0);
 
-const app = E.div({
+const App = E.div({
   className: "counter",
   children: [
     E.p({
@@ -35,9 +35,9 @@ const app = E.div({
       textContent: "Decrement",
     }),
   ],
-}).render();
+})
 
-document.body.appendChild(app.element);
+App.render(document.body) // returns the App instance.
 ```
 
 > Note: see more about signals...

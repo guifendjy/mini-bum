@@ -91,7 +91,7 @@ Adds:
 
 Public properties:
 
-- `render()` — prepares the instance (does not create/insert the DOM node).
+- `render(target?)` — creates and initializes the instance. When a target DOM node is provided, the rendered element is appended to it. Returns the Element instance.
 - `element` — the DOM node after `render()`; `null` before.
 - `destroy()` — removes bindings, runs cleanup, and removes node(s) from the DOM.
 

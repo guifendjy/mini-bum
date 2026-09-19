@@ -104,13 +104,21 @@ export default class Element {
     this.#directives = this.#getDirectives(this.rawProps);
   }
 
-  render() {
+  /**
+   * Creates and initializes the element. When a target is provided, the
+   * element is appended to that DOM node after rendering.
+   * @param {Node} [target] - DOM node to append the rendered element to.
+   * @returns {Element} This Element instance.
+   */
+  render(target) {
     this.element =
       this.#tag instanceof Node || this.#tag instanceof Element
         ? this.#tag
         : this.#createElement(this.#tag); // initialization
 
     this.#initialize();
+
+    if (target) target.appendChild(this.element);
 
     return this;
   }
