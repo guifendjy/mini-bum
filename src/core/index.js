@@ -5,6 +5,11 @@ import { $signal, $computed } from "../signal/signal.js";
 
 // 🍬 MINI BUM LIBRARY - CREATE DOM ELEMENTS OR ADD REACTIVITY TO EXISTING ELEMENTS🍬
 /**
+ * Core DOM and reactivity helpers for Mini Bum.
+ *
+ * @module core
+ */
+/**
  * @license MIT
  * Copyright © 2025 Dads Guifendjy Paul
  *
@@ -21,5 +26,21 @@ import { $signal, $computed } from "../signal/signal.js";
  * See LICENSE file for full terms. 🍬
  */
 
+/**
+ * Exports the core DOM element helpers.
+ *
+ * @type {Object}
+ * @property {typeof Element} Element Creates and manages a reactive DOM element.
+ * @property {typeof ListElement} ListElement Renders and updates a list of items.
+ * @property {typeof ConditionalElement} ConditionalElement Renders content based on a condition.
+ */
 export { Element, ListElement, ConditionalElement };
+
+/**
+ * Exports the reactivity helpers.
+ *
+ * @type {Object}
+ * @property {typeof $signal} $signal Creates reactive state.
+ * @property {typeof $computed} $computed Creates a value derived from reactive state.
+ */
 export { $signal, $computed };

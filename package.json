@@ -32,7 +32,7 @@
   "scripts": {
     "build": "rollup -c && npm run build:types",
     "build:watch": "rollup -c -w",
-    "build:types": "npx tsc -p tsconfig.core.json && npx tsc -p tsconfig.wrapper.json"
+    "build:types": "node generate-types.js"
   },
   "keywords": [
     "vanilla-js",
