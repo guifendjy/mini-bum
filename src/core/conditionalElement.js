@@ -1,5 +1,5 @@
 import shallowEqual from "./utils/shallowEqual.js";
-import { $computed } from "../signal/signal.js";
+import { $computed } from "../signal/Signal_instance.js";
 import uniqid from "./utils/uniqId.js";
 
 /** @template T @typedef {import("./Signal.js").default<T>} Signal */

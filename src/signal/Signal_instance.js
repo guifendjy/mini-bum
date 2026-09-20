@@ -113,3 +113,13 @@ export default class Signal {
     Signal.#scheduled = false;
   }
 }
+
+
+
+export function $signal(initialValue) {
+  return new Signal(initialValue);
+}
+
+export function $computed(fn, dependencies) {
+  return Signal.computed(fn, dependencies);
+}

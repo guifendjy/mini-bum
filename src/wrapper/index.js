@@ -1,5 +1,5 @@
 import _init_ from "./wrapper.js";
-import { $signal, $computed } from "../signal/signal.js";
+import { $signal, $computed } from "../signal/Signal_instance.js";
 
 // 🍬 MINI BUM LIBRARY - CREATE DOM ELEMENTS OR ADD REACTIVITY TO EXISTING ELEMENTS🍬
 /**
@@ -145,4 +145,43 @@ import { $signal, $computed } from "../signal/signal.js";
 const E = _init_();
 
 export default E;
-export { $signal, $computed };
+
+/** @template T @typedef {import("./Signal_instance.js").default<T>} SignalInterface */
+
+/**
+ * @callback SignalFactory
+ * @template T
+ * @param {T | (() => T) | undefined} [initialValue]
+ * @returns {SignalInterface<T>}
+ */
+
+/**
+ * @callback ComputedFactory
+ * @template T
+ * @param {() => T} fn
+ * @param {Array<SignalInterface<any>>} [dependencies]
+ * @returns {SignalInterface<T>}
+ */
+
+/**
+ * Create a new Signal instance.
+ *
+ * @internal
+ * @template T
+ * @param {T | (() => T) | undefined} [initialValue] - Initial value or thunk.
+ * @returns {SignalInterface<T>}
+ */
+
+/** @type {SignalFactory} */
+export { $signal };
+
+/**
+ * Create a computed Signal from an array of signals.
+ *
+ * @template T
+ * @param {() => T} fn - Compute function.
+ * @param {Array<SignalInterface<any>>} [dependencies] - Array of Signal instances to track.
+ * @returns {SignalInterface<T>}
+ */
+/** @type {ComputedFactory} */
+export { $computed };

@@ -13,12 +13,13 @@
       "types": "./dist/core.d.ts",
       "import": "./dist/minibum.core.js"
     },
+        "./core.min": {
+      "import": "./dist/minibum.core.min.js"
+    },
     "./min": {
       "import": "./dist/minibum.wrapper.min.js"
-    },
-    "./core.min": {
-      "import": "./dist/minibum.core.min.js"
     }
+
   },
   "files": [
     "dist/",
